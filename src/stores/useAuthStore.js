@@ -8,6 +8,7 @@ const useAuthStore = create((set, get) => ({
   role: null,
   isAuthenticated: false,
   loading: true,
+  onboardingCompleted: null,
 
   initialize: async () => {
     const { data: { session } } = await supabase.auth.getSession()
@@ -21,7 +22,7 @@ const useAuthStore = create((set, get) => ({
       if (event === 'SIGNED_IN' && session?.user) {
         await get()._loadProfile(session.user)
       } else if (event === 'SIGNED_OUT') {
-        set({ user: null, profile: null, role: null, isAuthenticated: false })
+        set({ user: null, profile: null, role: null, isAuthenticated: false, onboardingCompleted: null })
       }
     })
   },
@@ -51,12 +52,24 @@ const useAuthStore = create((set, get) => ({
     }
 
     if (profile) {
+      // For helpers, fetch onboarding_completed flag
+      let onboardingCompleted = null
+      if (profile.role === 'helper') {
+        const { data: helper } = await supabase
+          .from('helpers')
+          .select('onboarding_completed')
+          .eq('id', authUser.id)
+          .single()
+        onboardingCompleted = helper?.onboarding_completed ?? false
+      }
+
       set({
         user: authUser,
         profile,
         role: profile.role,
         isAuthenticated: true,
         loading: false,
+        onboardingCompleted,
       })
       useFavoritesStore.getState().fetchFavorites()
     } else {
@@ -64,15 +77,50 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  googleLogin: async () => {
+  googleLogin: async ({ intent, referredBy } = {}) => {
+    const params = new URLSearchParams()
+    if (intent) params.set('intent', intent)
+    if (referredBy) params.set('ref', referredBy)
+    const qs = params.toString()
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback${qs ? '?' + qs : ''}`,
       },
     })
     if (error) return { success: false, error: error.message }
     return { success: true }
+  },
+
+  _ensureHelperRecord: async (userId, referredBy) => {
+    // Check if helper record already exists
+    const { data: existing } = await supabase
+      .from('helpers')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (existing) return
+
+    // Upgrade profile role to helper
+    await supabase.from('profiles').update({ role: 'helper' }).eq('id', userId)
+
+    // Create empty helper shell
+    const helperData = {
+      id: userId,
+      description: '',
+      location_label: '',
+      availability: { timeOfDay: [], daysOfWeek: [] },
+      tier: 'free',
+      verified: false,
+      active: true,
+      locked: false,
+      onboarding_completed: false,
+    }
+    if (referredBy) helperData.referred_by = referredBy
+
+    await supabase.from('helpers').insert(helperData)
   },
 
   loginUser: async (email, password) => {
@@ -104,7 +152,7 @@ const useAuthStore = create((set, get) => ({
     return { success: true }
   },
 
-  register: async ({ name, email, password, phone, description, location, lat, lng, services, availability, referredBy }) => {
+  register: async ({ name, email, password, referredBy }) => {
     // 1. Sign up auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -123,24 +171,20 @@ const useAuthStore = create((set, get) => ({
       user_role: 'helper',
       user_name: name,
       user_email: email,
-      user_phone: phone || null,
     })
     if (profileError) return { success: false, error: profileError.message }
 
-    // 3. Create helper record
+    // 3. Create empty helper shell (onboarding_completed = false)
     const helperData = {
       id: userId,
-      description: description || '',
-      location_label: location || '',
-      availability: availability || { timeOfDay: [], daysOfWeek: [] },
+      description: '',
+      location_label: '',
+      availability: { timeOfDay: [], daysOfWeek: [] },
       tier: 'free',
       verified: false,
       active: true,
       locked: false,
-    }
-
-    if (lat != null && lng != null) {
-      helperData.location = `POINT(${lng} ${lat})`
+      onboarding_completed: false,
     }
 
     if (referredBy) {
@@ -150,36 +194,51 @@ const useAuthStore = create((set, get) => ({
     const { error: helperError } = await supabase.from('helpers').insert(helperData)
     if (helperError) return { success: false, error: helperError.message }
 
-    // 4. Create helper_services
-    if (services?.length > 0) {
-      const { data: categories } = await supabase
-        .from('categories')
-        .select('id, slug')
+    return { success: true }
+  },
 
-      const catMap = Object.fromEntries((categories || []).map(c => [c.slug, c.id]))
+  completeOnboarding: async () => {
+    const { user } = get()
+    if (!user) return { success: false, error: 'Ikke innlogget' }
 
-      const serviceRows = services
-        .filter(s => catMap[s.category])
-        .map(s => ({
-          helper_id: userId,
-          category_id: catMap[s.category],
-          hourly_rate: s.pricingType === 'hourly' ? s.hourlyRate : null,
-          pricing_type: s.pricingType || 'hourly',
-          competence: s.competence || '',
-          tags: s.tags || [],
-        }))
+    const { error } = await supabase
+      .from('helpers')
+      .update({ onboarding_completed: true })
+      .eq('id', user.id)
 
-      if (serviceRows.length > 0) {
-        await supabase.from('helper_services').insert(serviceRows)
-      }
-    }
+    if (error) return { success: false, error: error.message }
 
+    set({ onboardingCompleted: true })
+    return { success: true }
+  },
+
+  updateProfile: async (updates) => {
+    const { profile } = get()
+    if (!profile) return { success: false, error: 'Ikke innlogget' }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', profile.id)
+
+    if (error) return { success: false, error: error.message }
+
+    set({ profile: { ...profile, ...updates } })
+    return { success: true }
+  },
+
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc('delete_own_account')
+    if (error) return { success: false, error: error.message }
+
+    await supabase.auth.signOut()
+    set({ user: null, profile: null, role: null, isAuthenticated: false, onboardingCompleted: null })
     return { success: true }
   },
 
   logout: async () => {
     await supabase.auth.signOut()
-    set({ user: null, profile: null, role: null, isAuthenticated: false })
+    set({ user: null, profile: null, role: null, isAuthenticated: false, onboardingCompleted: null })
   },
 }))
 

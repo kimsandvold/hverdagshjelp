@@ -122,7 +122,7 @@ export default function Subscription() {
   const paidPlansAvailable = new Date() >= new Date('2026-06-01');
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="py-8">
       <h1 className="mb-2 text-2xl font-bold text-gray-900">Abonnement</h1>
       <p className="mb-8 text-gray-500">
         {'Velg planen som passer best for deg.'}

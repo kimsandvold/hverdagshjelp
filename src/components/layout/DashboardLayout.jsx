@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
-import useAuthStore from '../../stores/useAuthStore'
-import Logo from '../ui/Logo'
+import { NavLink, Outlet } from 'react-router-dom'
 
 const sidebarLinks = [
   { to: '/dashboard', label: 'Oversikt' },
@@ -14,68 +12,25 @@ const sidebarLinks = [
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, logout } = useAuthStore()
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-40">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Left: hamburger (mobile) + logo */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 text-gray-600 hover:text-primary-500"
-                aria-label="Meny"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {sidebarOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-              <Logo />
-            </div>
-
-            {/* Right: user name + logout */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 hidden sm:inline">
-                {user?.name || user?.email || 'Bruker'}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-gray-600 hover:text-primary-500 transition-colors"
-              >
-                Logg ut
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Mobile sidebar toggle */}
+      <div className="lg:hidden px-4 py-3">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-primary-500 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {sidebarOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+          Dashboard-meny
+        </button>
+      </div>
 
       {/* Sidebar overlay (mobile) */}
       {sidebarOpen && (
@@ -113,7 +68,7 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="pt-16 lg:ml-64 p-6">
+      <main className="lg:ml-64 p-6">
         <Outlet />
       </main>
     </div>

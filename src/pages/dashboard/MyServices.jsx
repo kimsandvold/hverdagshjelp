@@ -144,7 +144,7 @@ export default function MyServices() {
   const editingCat = editingSlug ? categories.find((c) => c.slug === editingSlug) : null;
 
   return (
-    <div className="mx-auto w-full max-w-[1000px] px-4 py-8">
+    <div className="w-full py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Mine tjenester</h1>
 
       <div className="space-y-6">
@@ -207,6 +207,9 @@ export default function MyServices() {
                     >
                       <div className="min-w-0">
                         <span className="text-sm font-medium text-gray-700">{cat.name}</span>
+                        {cat.description && (
+                          <p className="truncate text-xs text-gray-500 mt-0.5">{cat.description}</p>
+                        )}
                         {summary && (
                           <p className="truncate text-xs text-gray-400 mt-0.5">{summary}</p>
                         )}

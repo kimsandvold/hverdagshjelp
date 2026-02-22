@@ -209,8 +209,8 @@ const useHelperStore = create((set, get) => ({
     return {
       id: helper.id,
       name: helper.profiles.name,
-      email: helper.profiles.email,
-      phone: helper.profiles.phone,
+      email: helper.profiles.show_email !== false ? helper.profiles.email : null,
+      phone: helper.profiles.show_phone !== false ? helper.profiles.phone : null,
       avatar_url: helper.profiles.avatar_url,
       description: helper.description,
       location: helper.location_label,

@@ -35,12 +35,12 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Mine forespørsler</h1>
 
       {bookings.length === 0 ? (
         <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-          <p className="text-gray-500">Du har ingen forespørsler ennå.</p>
+          <p className="text-gray-500">Du har ikke sendt noen forespørsler enda.</p>
           <Link
             to="/search"
             className="mt-4 inline-block rounded-lg bg-primary-500 px-6 py-2 font-medium text-white hover:bg-primary-600"

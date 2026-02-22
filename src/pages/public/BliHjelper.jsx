@@ -78,14 +78,16 @@ export default function BliHjelper() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(245,158,11,0.12)_0%,_transparent_60%)]" />
         <div className="relative mx-auto max-w-4xl text-center">
           <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm">
-            Tjen penger på det du kan
+            Gjør en forskjell i ditt nabolag
           </span>
           <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-5xl">
             Bli hjelper på Hverdagshjelp
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/75">
-            Bruk det du er god på til å hjelpe folk i nærheten — og tjen penger
-            på det. Kom i gang gratis.
+            Mange trenger hjelp med hverdagslige oppgaver — men vet ikke hvem de
+            skal spørre. Som hjelper gjør du en reell forskjell for folk i
+            nærmiljøet ditt, samtidig som du tjener penger på det du allerede
+            kan. Kom i gang gratis.
           </p>
         </div>
       </section>
@@ -147,56 +149,82 @@ export default function BliHjelper() {
         </div>
       </section>
 
-      {/* Ærlighet, betaling, omdømme — info sections */}
+      {/* Hvorfor bli hjelper — community angle */}
       <section className="bg-gray-50 px-4 py-16">
-        <div className="mx-auto max-w-4xl space-y-12">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Ærlighet og kvalitet
-            </h2>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Profilen din er det første kunder ser. Det er viktig at
-              informasjonen du oppgir — erfaring, bilder, priser og beskrivelser
-              — er ærlig og oppdatert. Misvisende profiler skader tilliten på
-              plattformen og kan føre til at kontoen din blir fjernet.
-            </p>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-center text-2xl font-bold text-gray-900 sm:text-3xl">
+            Hvorfor bli hjelper?
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-center text-gray-500">
+            Det handler om mer enn bare penger.
+          </p>
+          <div className="mt-12 space-y-12">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Styrk lokalsamfunnet ditt
+              </h3>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                Mange eldre, familier og travle folk sliter med å finne noen de
+                stoler på for hverdagslige oppgaver. Ved å tilby hjelpen din
+                lokalt bygger du tillit i nabolaget og bidrar til et tryggere,
+                mer sammensveiset fellesskap. Du er ikke bare en tjenesteleverandør
+                — du er en ressurs for menneskene rundt deg.
+              </p>
+            </div>
 
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Betaling og ansvar
-            </h2>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Som hjelper er du selv ansvarlig for hvordan du mottar betaling fra
-              kunden. Hverdagshjelp håndterer ikke betaling mellom deg og kunden
-              — dere avtaler dette direkte seg imellom.
-            </p>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Vi anbefaler at du oppretter et{' '}
-              <strong>enkeltpersonforetak (ENK)</strong> slik at du kan fakturere
-              kunder og drive virksomheten din ryddig og lovlig. Det er enkelt og
-              gratis å registrere et foretak på{' '}
-              <a
-                href="https://www.brreg.no"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary-500 underline hover:text-primary-600"
-              >
-                Brønnøysundregistrene
-              </a>
-              .
-            </p>
-          </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Ærlighet og kvalitet
+              </h3>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                Profilen din er det første kunder ser. Det er viktig at
+                informasjonen du oppgir — erfaring, bilder, priser og beskrivelser
+                — er ærlig og oppdatert. Misvisende profiler skader tilliten på
+                plattformen og kan føre til at kontoen din blir fjernet.
+              </p>
+            </div>
 
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Godt omdømme gir flere oppdrag
-            </h2>
-            <p className="mt-3 leading-relaxed text-gray-600">
-              Fornøyde kunder anbefaler deg videre til venner, naboer og familie
-              — og jungeltelegrafen er den viktigste kanalen for å få flere
-              oppdrag. Vær alltid vennlig, imøtekommende og profesjonell.
-            </p>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Betaling og ansvar
+              </h3>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                Som hjelper er du selv ansvarlig for hvordan du mottar betaling fra
+                kunden. Hverdagshjelp håndterer ikke betaling mellom deg og kunden
+                — dere avtaler dette direkte seg imellom.
+              </p>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                Hvis du planlegger å bruke plattformen til å tjene penger
+                regelmessig, anbefaler vi at du oppretter et{' '}
+                <strong>enkeltpersonforetak (ENK)</strong>. Da kan du fakturere
+                kunder, trekke fra utgifter og drive virksomheten din ryddig og
+                lovlig. Det tar bare noen minutter og er helt gratis å registrere
+                på{' '}
+                <a
+                  href="https://www.brreg.no"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary-500 underline hover:text-primary-600"
+                >
+                  Brønnøysundregistrene
+                </a>
+                . Du er ikke pålagt å ha foretak for å bruke plattformen, men det
+                gir deg en tryggere og mer profesjonell ramme.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Godt omdømme gir flere oppdrag
+              </h3>
+              <p className="mt-3 leading-relaxed text-gray-600">
+                Fornøyde kunder anbefaler deg videre til venner, naboer og familie
+                — og jungeltelegrafen er den viktigste kanalen for å få flere
+                oppdrag. Gode anmeldelser på profilen din gjør at nye kunder
+                velger akkurat deg. Vær alltid vennlig, imøtekommende og
+                profesjonell.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -208,8 +236,8 @@ export default function BliHjelper() {
             Priser
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-center text-gray-500">
-            Kom i gang gratis, og oppgrader når du trenger mer synlighet og
-            flere funksjoner.
+            Kom i gang gratis — du velger eventuell oppgradering etter at du har
+            registrert deg og satt opp profilen din.
           </p>
 
           <div className="mx-auto mt-8 max-w-xl rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-center">

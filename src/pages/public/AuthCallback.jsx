@@ -3,6 +3,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuthStore from '../../stores/useAuthStore'
 
+function getRedirectPath() {
+  const { profile, onboardingCompleted } = useAuthStore.getState()
+
+  if (profile?.role === 'admin') return '/admin/dashboard'
+  if (profile?.role === 'helper') {
+    return onboardingCompleted === false ? '/onboarding' : '/dashboard'
+  }
+  return '/search'
+}
+
 export default function AuthCallback() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -20,6 +30,8 @@ export default function AuthCallback() {
         return
       }
 
+      const intent = searchParams.get('intent')
+      const referredBy = searchParams.get('ref')
       const code = searchParams.get('code')
 
       if (code) {
@@ -32,21 +44,21 @@ export default function AuthCallback() {
         }
       }
 
+      const finalize = async (user) => {
+        // If registering as helper via Google, ensure helper record exists
+        if (intent === 'helper') {
+          await useAuthStore.getState()._ensureHelperRecord(user.id, referredBy || null)
+        }
+
+        await useAuthStore.getState().initialize()
+        navigate(getRedirectPath(), { replace: true })
+      }
+
       // For both PKCE and implicit flow, wait for the session to be ready
-      // Supabase client auto-detects tokens in the URL hash
       const { data: { session } } = await supabase.auth.getSession()
 
       if (session?.user) {
-        await useAuthStore.getState().initialize()
-        const profile = useAuthStore.getState().profile
-
-        if (profile?.role === 'admin') {
-          navigate('/admin/dashboard', { replace: true })
-        } else if (profile?.role === 'helper') {
-          navigate('/dashboard', { replace: true })
-        } else {
-          navigate('/search', { replace: true })
-        }
+        await finalize(session.user)
         return
       }
 
@@ -55,16 +67,7 @@ export default function AuthCallback() {
         async (event, newSession) => {
           if (event === 'SIGNED_IN' && newSession?.user) {
             subscription.unsubscribe()
-            await useAuthStore.getState().initialize()
-            const profile = useAuthStore.getState().profile
-
-            if (profile?.role === 'admin') {
-              navigate('/admin/dashboard', { replace: true })
-            } else if (profile?.role === 'helper') {
-              navigate('/dashboard', { replace: true })
-            } else {
-              navigate('/search', { replace: true })
-            }
+            await finalize(newSession.user)
           }
         }
       )
