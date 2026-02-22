@@ -1,0 +1,127 @@
+import { Link } from 'react-router-dom';
+import Badge from './ui/Badge';
+import useFavoritesStore from '../stores/useFavoritesStore';
+import useAuthStore from '../stores/useAuthStore';
+
+export default function HelperCard({ helper }) {
+  const firstLetter = helper.name?.charAt(0)?.toUpperCase() ?? '?';
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isFavorite = useFavoritesStore((state) => state.isFavorite(helper.id));
+  const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
+
+  const handleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) return;
+    toggleFavorite(helper.id);
+  };
+
+  const services = helper.services || [];
+  const visibleServices = services.slice(0, 4);
+  const extraCount = services.length - 4;
+
+  return (
+    <Link
+      to={`/helper/${helper.id}`}
+      className={`block rounded-xl p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md overflow-hidden ${
+        helper.tier === 'premium'
+          ? 'border-2 border-accent-400 bg-accent-50/30'
+          : 'bg-white'
+      }`}
+    >
+      {/* Top row: avatar + name/location + badges/bookmark */}
+      <div className="flex items-start gap-3 sm:gap-4">
+        {/* Avatar */}
+        {helper.avatar_url ? (
+          <img
+            src={helper.avatar_url}
+            alt={helper.name}
+            className="h-11 w-11 sm:h-14 sm:w-14 flex-shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-11 w-11 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary-200 text-base sm:text-lg font-bold text-primary-700">
+            {firstLetter}
+          </div>
+        )}
+
+        {/* Name, location */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold text-gray-900 truncate">
+                {helper.name}
+              </h3>
+              {(helper.location || helper.location_label) && (
+                <p className="mt-0.5 text-sm text-gray-500 truncate">{helper.location || helper.location_label}</p>
+              )}
+            </div>
+
+            {/* Badges + Bookmark */}
+            <div className="flex flex-shrink-0 items-center gap-1 sm:gap-2">
+              {helper.tier === 'premium' && <Badge type="premium" />}
+              {helper.tier === 'basic' && <Badge type="basic" />}
+              {helper.verified && <span className="hidden sm:inline"><Badge type="verified" /></span>}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={handleFavorite}
+                  className="rounded-full p-1 transition-colors hover:bg-gray-100 cursor-pointer"
+                  title={isFavorite ? 'Fjern fra lagrede' : 'Lagre hjelper'}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-5 w-5 ${isFavorite ? 'fill-primary-500 text-primary-500' : 'text-gray-400'}`}
+                    viewBox="0 0 24 24"
+                    fill={isFavorite ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Description */}
+      {helper.description && (
+        <p className="mt-3 line-clamp-2 text-sm text-gray-500">
+          {helper.description}
+        </p>
+      )}
+
+      {/* Service category chips */}
+      {services.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {visibleServices.map((s) => (
+              <span
+                key={s.category}
+                className="inline-flex items-center rounded-full bg-primary-50 px-3 py-1.5 text-xs font-medium text-primary-700"
+              >
+                {s.categoryName || s.category}
+              </span>
+          ))}
+          {extraCount > 0 && (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-500">
+              +{extraCount} til
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* CTA */}
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-xs text-gray-400">Se profil for detaljer</span>
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600">
+          Send forespørsel
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
+    </Link>
+  );
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "free",
+    "name": "Gratis",
+    "price": 0,
+    "period": "alltid",
+    "features": ["Synlig for kunder i ditt område", "Vis i søkeresultater", "2 tjenestekategorier"],
+    "highlighted": false
+  },
+  {
+    "id": "basic",
+    "name": "Basis",
+    "price": 299,
+    "period": "mnd",
+    "features": ["Alt i Gratis", "Prioritert i søk", "5 tjenestekategorier", "Verifisert-merke", "Se hvem som har sett profilen din"],
+    "highlighted": true
+  },
+  {
+    "id": "premium",
+    "name": "Premium",
+    "price": 499,
+    "period": "mnd",
+    "features": ["Alt i Basis", "Vis øverst i søkeresultater", "Ubegrenset tjenestekategorier", "Premium-merke", "Fremhevet profil", "Rabatt ved verving"],
+    "highlighted": false
+  }
+]
