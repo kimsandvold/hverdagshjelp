@@ -11,6 +11,8 @@ export default function SettingsPage() {
 
   const [showPhone, setShowPhone] = useState(true)
   const [showEmail, setShowEmail] = useState(true)
+  const [showAge, setShowAge] = useState(true)
+  const [showLanguages, setShowLanguages] = useState(true)
   const [active, setActive] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -22,6 +24,8 @@ export default function SettingsPage() {
     if (profile) {
       setShowPhone(profile.show_phone !== false)
       setShowEmail(profile.show_email !== false)
+      setShowAge(profile.show_age !== false)
+      setShowLanguages(profile.show_languages !== false)
     }
   }, [profile])
 
@@ -36,6 +40,8 @@ export default function SettingsPage() {
   const handleToggle = async (field, value) => {
     if (field === 'show_phone') setShowPhone(value)
     if (field === 'show_email') setShowEmail(value)
+    if (field === 'show_age') setShowAge(value)
+    if (field === 'show_languages') setShowLanguages(value)
 
     setSaving(true)
     await updateProfile({ [field]: value })
@@ -110,6 +116,48 @@ export default function SettingsPage() {
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                   showEmail ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Show age toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Vis alder</p>
+              <p className="text-xs text-gray-400">Andre brukere kan se alderen din</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleToggle('show_age', !showAge)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
+                showAge ? 'bg-primary-500' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showAge ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Show languages toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Vis språk</p>
+              <p className="text-xs text-gray-400">Andre brukere kan se språkene dine</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleToggle('show_languages', !showLanguages)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
+                showLanguages ? 'bg-primary-500' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showLanguages ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>

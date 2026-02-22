@@ -149,6 +149,21 @@ const useMessagesStore = create((set, get) => ({
     }))
   },
 
+  searchProfiles: async (query) => {
+    if (!query || query.trim().length < 2) return []
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url')
+      .neq('id', user.id)
+      .ilike('name', `%${query.trim()}%`)
+      .limit(10)
+
+    return data || []
+  },
+
   fetchUnreadCount: async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return

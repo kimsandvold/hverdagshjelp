@@ -6,6 +6,20 @@ const useBookingStore = create((set) => ({
   bookings: [],
   loading: false,
   updatedCount: 0,
+  incomingPendingCount: 0,
+
+  fetchIncomingPendingCount: async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { count } = await supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('helper_id', user.id)
+      .eq('status', 'pending')
+
+    set({ incomingPendingCount: count || 0 })
+  },
 
   fetchUpdatedCount: async () => {
     const { data: { user } } = await supabase.auth.getUser()

@@ -67,6 +67,9 @@ const useAdminStore = create((set, get) => ({
       verified: h.verified,
       active: h.active,
       locked: h.locked,
+      birthDate: h.birth_date,
+      languages: h.languages,
+      avatarColor: h.avatar_color,
       createdAt: h.created_at,
       services: servicesByHelper[h.id] || [],
       paymentStatus: subByHelper[h.id] || null,
@@ -109,6 +112,44 @@ const useAdminStore = create((set, get) => ({
     set((state) => ({
       helpers: state.helpers.map(h => h.id === id ? { ...h, verified: newVerified } : h),
     }))
+  },
+
+  updateHelper: async (id, updates) => {
+    const profileFields = {}
+    const helperFields = {}
+
+    if (updates.name !== undefined) profileFields.name = updates.name
+    if (updates.phone !== undefined) profileFields.phone = updates.phone
+
+    if (updates.description !== undefined) helperFields.description = updates.description
+    if (updates.location !== undefined) helperFields.location_label = updates.location
+    if (updates.tier !== undefined) helperFields.tier = updates.tier
+    if (updates.verified !== undefined) helperFields.verified = updates.verified
+    if (updates.active !== undefined) helperFields.active = updates.active
+    if (updates.birthDate !== undefined) helperFields.birth_date = updates.birthDate
+    if (updates.languages !== undefined) helperFields.languages = updates.languages
+    if (updates.avatarColor !== undefined) helperFields.avatar_color = updates.avatarColor
+
+    if (Object.keys(profileFields).length > 0) {
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileFields)
+        .eq('id', id)
+      if (error) return { error }
+    }
+
+    if (Object.keys(helperFields).length > 0) {
+      const { error } = await supabase
+        .from('helpers')
+        .update(helperFields)
+        .eq('id', id)
+      if (error) return { error }
+    }
+
+    set((state) => ({
+      helpers: state.helpers.map(h => h.id === id ? { ...h, ...updates } : h),
+    }))
+    return { error: null }
   },
 
   addCategory: async (category) => {

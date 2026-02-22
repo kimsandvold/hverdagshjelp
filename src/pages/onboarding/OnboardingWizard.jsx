@@ -66,6 +66,8 @@ export default function OnboardingWizard() {
       setHelperData({
         description: helper?.description || '',
         phone: profile?.phone || '',
+        birth_date: helper?.birth_date || '',
+        languages: helper?.languages || [],
         lat,
         lng,
         availability: helper?.availability || { timeOfDay: [], daysOfWeek: [] },

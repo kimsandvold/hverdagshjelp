@@ -9,6 +9,7 @@ export default function MessagesPage() {
   const {
     conversations, activeMessages, loading,
     fetchConversations, fetchMessages, sendMessage, markAsRead, deleteConversation,
+    startConversation, searchProfiles,
   } = useMessagesStore();
 
   const [activeConversationId, setActiveConversationId] = useState(null);
@@ -18,6 +19,13 @@ export default function MessagesPage() {
   const [showPhoneInput, setShowPhoneInput] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
   const messagesEndRef = useRef(null);
+
+  // Search state
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchConversations();
@@ -33,6 +41,23 @@ export default function MessagesPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeMessages]);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      const results = await searchProfiles(searchQuery);
+      setSearchResults(results);
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(searchTimeoutRef.current);
+  }, [searchQuery, searchProfiles]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -59,6 +84,17 @@ export default function MessagesPage() {
     setSending(false);
   };
 
+  const handleStartConversation = async (recipientId) => {
+    const result = await startConversation(recipientId);
+    if (result.conversationId) {
+      await fetchConversations();
+      setActiveConversationId(result.conversationId);
+      setShowSearch(false);
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  };
+
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
   if (loading && conversations.length === 0) {
@@ -76,43 +112,104 @@ export default function MessagesPage() {
       <div className="flex h-[calc(100vh-16rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {/* Conversation list */}
         <div className={`w-full border-r border-gray-200 md:w-80 md:flex-shrink-0 ${activeConversationId ? 'hidden md:block' : ''}`}>
-          <div className="h-full overflow-y-auto">
-            {conversations.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-500">
-                Ingen samtaler ennå. Start en samtale fra en hjelperprofil.
+          <div className="flex flex-col h-full">
+            {/* New conversation button */}
+            <div className="border-b border-gray-200 p-3">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 cursor-pointer"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Ny samtale
+              </button>
+            </div>
+
+            {/* Search panel */}
+            {showSearch && (
+              <div className="border-b border-gray-200 p-3">
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Søk etter person..."
+                    className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    autoFocus
+                  />
+                </div>
+                {searching && (
+                  <p className="mt-2 text-xs text-gray-400">Søker...</p>
+                )}
+                {searchResults.length > 0 && (
+                  <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-gray-100">
+                    {searchResults.map((person) => (
+                      <button
+                        key={person.id}
+                        onClick={() => handleStartConversation(person.id)}
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-gray-50 cursor-pointer"
+                      >
+                        {person.avatar_url ? (
+                          <img src={person.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-200 text-xs font-bold text-primary-700">
+                            {person.name?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                        )}
+                        <span className="text-sm font-medium text-gray-900">{person.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {searchQuery.trim().length >= 2 && !searching && searchResults.length === 0 && (
+                  <p className="mt-2 text-xs text-gray-500">Ingen resultater for «{searchQuery}»</p>
+                )}
               </div>
-            ) : (
-              conversations.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => setActiveConversationId(conv.id)}
-                  className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors hover:bg-gray-50 cursor-pointer ${
-                    conv.id === activeConversationId ? 'bg-primary-50' : ''
-                  }`}
-                >
-                  {conv.otherUserAvatar ? (
-                    <img src={conv.otherUserAvatar} alt="" className="h-10 w-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-200 text-sm font-bold text-primary-700">
-                      {conv.otherUserName?.charAt(0)?.toUpperCase() || '?'}
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-900 truncate">{conv.otherUserName}</span>
-                      {conv.unreadCount > 0 && (
-                        <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs text-white">
-                          {conv.unreadCount}
-                        </span>
+            )}
+
+            {/* Conversations */}
+            <div className="flex-1 overflow-y-auto">
+              {conversations.length === 0 && !showSearch ? (
+                <div className="p-6 text-center text-sm text-gray-500">
+                  Ingen samtaler ennå. Trykk «Ny samtale» for å starte.
+                </div>
+              ) : (
+                conversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => setActiveConversationId(conv.id)}
+                    className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors hover:bg-gray-50 cursor-pointer ${
+                      conv.id === activeConversationId ? 'bg-primary-50' : ''
+                    }`}
+                  >
+                    {conv.otherUserAvatar ? (
+                      <img src={conv.otherUserAvatar} alt="" className="h-10 w-10 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-200 text-sm font-bold text-primary-700">
+                        {conv.otherUserName?.charAt(0)?.toUpperCase() || '?'}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900 truncate">{conv.otherUserName}</span>
+                        {conv.unreadCount > 0 && (
+                          <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs text-white">
+                            {conv.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {conv.lastMessage && (
+                        <p className="mt-0.5 text-xs text-gray-500 truncate">{conv.lastMessage}</p>
                       )}
                     </div>
-                    {conv.lastMessage && (
-                      <p className="mt-0.5 text-xs text-gray-500 truncate">{conv.lastMessage}</p>
-                    )}
-                  </div>
-                </button>
-              ))
-            )}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

@@ -35,6 +35,9 @@ create table helpers (
   active boolean not null default true,
   locked boolean not null default false,
   onboarding_completed boolean not null default false,
+  languages jsonb not null default '[]',
+  birth_date date,
+  avatar_color text,
   referred_by uuid references helpers(id),
   created_at timestamptz not null default now()
 );
@@ -362,6 +365,7 @@ returns table (
   email text,
   phone text,
   avatar_url text,
+  avatar_color text,
   description text,
   location_label text,
   lat double precision,
@@ -371,6 +375,8 @@ returns table (
   tier text,
   verified boolean,
   active boolean,
+  languages jsonb,
+  birth_date date,
   referred_by uuid,
   created_at timestamptz,
   services jsonb,
@@ -387,6 +393,7 @@ begin
     p.email,
     p.phone,
     p.avatar_url,
+    h.avatar_color,
     h.description,
     h.location_label,
     st_y(h.location::geometry) as lat,
@@ -396,6 +403,8 @@ begin
     h.tier,
     h.verified,
     h.active,
+    h.languages,
+    h.birth_date,
     h.referred_by,
     h.created_at,
     coalesce(
@@ -543,22 +552,22 @@ $$;
 -- ============================================================
 
 insert into categories (slug, name, icon, description, color, sort_order) values
-  ('rengjoring', 'Rengjøring', null, 'Profesjonell rengjøring av hjem og kontor', null, 1),
-  ('snorydding', 'Snørydding', null, 'Snørydding av innkjørsler, tak og gangveier', null, 2),
-  ('hagearbeid', 'Hagearbeid', null, 'Gressklipping, hekklipping og hagevedlikehold', null, 3),
-  ('smajobber', 'Småjobber', null, 'Montering, flytting og diverse oppgaver', null, 4),
-  ('handlehjelp', 'Handlehjelp', null, 'Hjelp med dagligvarehandel og ærend', null, 5),
-  ('flytting', 'Flytting', null, 'Flyttehjelp og transport av møbler', null, 6),
-  ('vaktmester', 'Vaktmester', null, 'Vedlikehold og reparasjoner i hjemmet', null, 7),
-  ('hundelufting', 'Hundelufting', null, 'Lufting og pass av kjæledyr', null, 8),
-  ('besoksvenn', 'Besøksvenn', null, 'Selskap, samtale og sosial støtte', null, 9),
-  ('transport', 'Transport', null, 'Kjøring til avtaler, handling og ærend', null, 10),
-  ('pc-hjelp', 'PC-hjelp', null, 'Hjelp med datamaskin, nettbrett og mobil', null, 11),
-  ('kurs-opplaring', 'Kurs/opplæring', null, 'Undervisning, kurs og personlig opplæring', null, 12),
-  ('turfolge', 'Turfølge', null, 'Følge på tur, gåtur eller aktivitet', null, 13),
-  ('sjafor', 'Sjåfør', null, 'Kjøring til lege, butikk eller andre ærend', null, 14),
-  ('barnepass', 'Barnepass', null, 'Barnevakt, henting fra skole og aktiviteter', null, 15),
-  ('rydding', 'Rydding', null, 'Rydding, sortering og organisering av hjem', null, 16)
+  ('rengjoring', 'Rengjøring', null, 'Rengjøring av hjem, kontor og fellesareal', null, 1),
+  ('hage-og-utearbeid', 'Hage og utearbeid', null, 'Hagearbeid, gressklipping, snørydding og utevedlikehold', null, 2),
+  ('smajobber', 'Småjobber og vedlikehold', null, 'Montering, reparasjoner og enkel vedlikehold i hjemmet', null, 3),
+  ('handlehjelp', 'Handlehjelp og ærend', null, 'Hjelp med dagligvarehandel, apotektur og andre ærend', null, 4),
+  ('flyttehjelp', 'Flytting og bærehjelp', null, 'Flytting, bærehjelp og transport av tunge ting', null, 5),
+  ('kjoring-og-folge', 'Kjøring og følge', null, 'Kjøring til lege, butikk eller avtaler — med selskap underveis', null, 6),
+  ('barnepass', 'Barnepass', null, 'Barnevakt, henting fra skole og aktiviteter', null, 7),
+  ('dyrepass', 'Dyrepass', null, 'Lufting, pass og stell av kjæledyr', null, 8),
+  ('rydding', 'Rydding og organisering', null, 'Rydding, sortering og organisering av hjem og garasje', null, 9),
+  ('besoksvenn', 'Besøksvenn og selskap', null, 'Noen å prate med, drikke kaffe med eller bare ha selskap av', null, 10),
+  ('turfolge', 'Turfølge og aktiviteter', null, 'Følge på tur, gåtur eller felles aktivitet utendørs', null, 11),
+  ('matlaging', 'Matlaging og måltider', null, 'Hjelp med matlaging, middagsplanlegging eller et måltid sammen', null, 12),
+  ('digital-hjelp', 'Digital hjelp', null, 'Hjelp med mobil, nettbrett, PC, apper og digitale tjenester', null, 13),
+  ('leksehjelp', 'Leksehjelp og språkhjelp', null, 'Leksehjelp for barn og unge, eller språktrening for voksne', null, 14),
+  ('kurs-opplaring', 'Kurs og opplæring', null, 'Personlig undervisning, kurs og opplæring i praktiske ferdigheter', null, 15),
+  ('motivator', 'Motivator', null, 'Noen som heier på deg — treningspartner, vanebygger eller daglig dytt', null, 16)
 on conflict (slug) do nothing;
 
 -- ============================================================
@@ -851,7 +860,9 @@ create trigger check_service_limit
 
 alter table profiles
   add column show_phone boolean not null default true,
-  add column show_email boolean not null default true;
+  add column show_email boolean not null default true,
+  add column show_age boolean not null default true,
+  add column show_languages boolean not null default true;
 
 -- ============================================================
 -- 18. Delete own account RPC
@@ -891,6 +902,7 @@ returns table (
   email text,
   phone text,
   avatar_url text,
+  avatar_color text,
   description text,
   location_label text,
   lat double precision,
@@ -900,6 +912,8 @@ returns table (
   tier text,
   verified boolean,
   active boolean,
+  languages jsonb,
+  birth_date date,
   referred_by uuid,
   created_at timestamptz,
   services jsonb,
@@ -916,6 +930,7 @@ begin
     case when p.show_email then p.email else null end,
     case when p.show_phone then p.phone else null end,
     p.avatar_url,
+    h.avatar_color,
     h.description,
     h.location_label,
     st_y(h.location::geometry) as lat,
@@ -925,6 +940,8 @@ begin
     h.tier,
     h.verified,
     h.active,
+    case when p.show_languages then h.languages else '[]'::jsonb end,
+    case when p.show_age then h.birth_date else null end,
     h.referred_by,
     h.created_at,
     coalesce(
@@ -1015,3 +1032,55 @@ begin
   limit page_limit;
 end;
 $$;
+
+-- ============================================================
+-- 20. Helper References ("Tilby deg som referanse")
+-- ============================================================
+
+create table helper_references (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references profiles(id) on delete cascade,
+  helper_id uuid not null references helpers(id) on delete cascade,
+  message text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, helper_id)
+);
+
+create index helper_references_helper_id_idx on helper_references (helper_id);
+create index helper_references_user_id_idx on helper_references (user_id);
+
+-- Add reference_count to helpers
+alter table helpers add column reference_count int not null default 0;
+
+-- Auto-update reference_count trigger
+create or replace function update_reference_count()
+returns trigger as $$
+declare
+  target_helper_id uuid;
+begin
+  target_helper_id := coalesce(new.helper_id, old.helper_id);
+  update helpers
+  set reference_count = (select count(*) from helper_references where helper_id = target_helper_id)
+  where id = target_helper_id;
+  return coalesce(new, old);
+end;
+$$ language plpgsql security definer;
+
+create trigger references_count_trigger
+  after insert or update or delete on helper_references
+  for each row execute function update_reference_count();
+
+-- RLS
+alter table helper_references enable row level security;
+
+create policy "Anyone can read references"
+  on helper_references for select using (true);
+
+create policy "Users can insert own references"
+  on helper_references for insert with check (auth.uid() = user_id);
+
+create policy "Users can update own references"
+  on helper_references for update using (auth.uid() = user_id);
+
+create policy "Users can delete own references"
+  on helper_references for delete using (auth.uid() = user_id);

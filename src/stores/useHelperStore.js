@@ -177,9 +177,12 @@ const useHelperStore = create((set, get) => ({
   },
 
   getHelperById: async (id) => {
-    // Check local cache first
+    // Check local cache first (search results use location_label, normalize to location)
     const cached = get().helpers.find(h => h.id === id)
-    if (cached) return cached
+    if (cached) return {
+      ...cached,
+      location: cached.location || cached.location_label || '',
+    }
 
     // Fetch from Supabase
     const { data: helper } = await supabase
@@ -212,11 +215,14 @@ const useHelperStore = create((set, get) => ({
       email: helper.profiles.show_email !== false ? helper.profiles.email : null,
       phone: helper.profiles.show_phone !== false ? helper.profiles.phone : null,
       avatar_url: helper.profiles.avatar_url,
+      avatar_color: helper.avatar_color,
       description: helper.description,
       location: helper.location_label,
       lat,
       lng,
       availability: helper.availability,
+      languages: helper.languages || [],
+      birth_date: helper.birth_date,
       reviewCount: helper.review_count,
       tier: helper.tier,
       verified: helper.verified,
@@ -252,9 +258,12 @@ const useHelperStore = create((set, get) => ({
     if (data.description !== undefined) helperUpdate.description = data.description
     if (data.location !== undefined) helperUpdate.location_label = data.location
     if (data.availability !== undefined) helperUpdate.availability = data.availability
+    if (data.languages !== undefined) helperUpdate.languages = data.languages
+    if (data.birth_date !== undefined) helperUpdate.birth_date = data.birth_date || null
     if (data.tier !== undefined) helperUpdate.tier = data.tier
     if (data.active !== undefined) helperUpdate.active = data.active
     if (data.verified !== undefined) helperUpdate.verified = data.verified
+    if (data.avatar_color !== undefined) helperUpdate.avatar_color = data.avatar_color
     if (data.lat != null && data.lng != null) {
       helperUpdate.location = `POINT(${data.lng} ${data.lat})`
     }

@@ -15,14 +15,9 @@ const ctaVariants = [
     text: 'Mange trenger hjelp med rengjøring, men finner ikke noen de stoler på. Kanskje er du den rette.',
   },
   {
-    categoryId: 'snorydding',
-    heading: 'Tåler du litt kulde?',
-    text: 'Hver vinter står folk fast med snø til knærne. Har du en spade og litt overskudd, trenger nabolaget deg.',
-  },
-  {
-    categoryId: 'hagearbeid',
+    categoryId: 'hage-og-utearbeid',
     heading: 'Liker du å se ting gro?',
-    text: 'Mange drømmer om en fin hage, men mangler tid eller kunnskap. Din grønne tommel kan gjøre en forskjell.',
+    text: 'Hage, snørydding og utearbeid — mange trenger en ekstra hånd utendørs. Din innsats kan gjøre en stor forskjell.',
   },
   {
     categoryId: 'smajobber',
@@ -30,29 +25,44 @@ const ctaVariants = [
     text: 'En løs hylle, et bilde som skal henges opp, en dør som knirker. Småjobber som betyr mye for noen.',
   },
   {
-    categoryId: 'flytting',
+    categoryId: 'flyttehjelp',
     heading: 'Sterk rygg og ledig lørdag?',
     text: 'Flytting er stressende nok som det er. Med litt ekstra muskelkraft kan du gjøre dagen enklere for noen.',
   },
   {
-    categoryId: 'vaktmester',
-    heading: 'Praktisk anlagt?',
-    text: 'En lekkende kran, et vindu som ikke lukkes, en lampe som skal opp. Hverdagsproblemer du kan løse for andre.',
+    categoryId: 'kjoring-og-folge',
+    heading: 'Ledig bil og litt tid?',
+    text: 'Mange trenger skyss til legen, butikken eller en avtale — og setter pris på litt selskap underveis.',
   },
   {
-    categoryId: 'hundelufting',
+    categoryId: 'dyrepass',
     heading: 'Glad i dyr?',
-    text: 'Noen ganger trenger en hund en ekstra tur, og eieren en hjelpende hånd. Kanskje er det akkurat det du kan tilby.',
+    text: 'Noen ganger trenger en hund en ekstra tur, eller en katt pass mens eieren er bortreist. Kanskje er det akkurat det du kan tilby.',
+  },
+  {
+    categoryId: 'besoksvenn',
+    heading: 'Har du tid til en kaffe?',
+    text: 'Noen trenger bare noen å prate med. Et besøk, en kaffekopp, litt selskap. Det kan bety alt.',
+  },
+  {
+    categoryId: 'matlaging',
+    heading: 'Glad i å lage mat?',
+    text: 'Et hjemmelaget måltid kan lyse opp hverdagen for noen som ikke klarer det selv. Del matgleden din.',
+  },
+  {
+    categoryId: 'motivator',
+    heading: 'Er du en som heier?',
+    text: 'Noen trenger en treningspartner, en vanebygger eller bare et daglig dytt i riktig retning. Kanskje er du den personen.',
   },
 ];
 
 const shuffled = [...ctaVariants].sort(() => Math.random() - 0.5);
 
 const highlights = [
-  { title: 'Hjem og hage', items: ['Rengjøring', 'Hagearbeid', 'Rydding og organisering', 'Vaktmestertjenester'] },
-  { title: 'Praktisk hjelp', items: ['Småjobber og montering', 'Flyttehjelp', 'Handlehjelp', 'Snørydding'] },
-  { title: 'Følge og omsorg', items: ['Besøksvenn', 'Turfølge', 'Barnepass', 'Hundelufting'] },
-  { title: 'Transport og teknologi', items: ['Sjåfør og transport', 'PC- og mobilhjelp', 'Kurs og opplæring'] },
+  { title: 'Hjem og hage', items: ['Rengjøring', 'Hage og utearbeid', 'Småjobber og vedlikehold', 'Rydding og organisering'] },
+  { title: 'Praktisk hjelp', items: ['Handlehjelp og ærend', 'Flytting og bærehjelp', 'Kjøring og følge', 'Matlaging og måltider'] },
+  { title: 'Omsorg og selskap', items: ['Besøksvenn og selskap', 'Turfølge og aktiviteter', 'Barnepass', 'Dyrepass'] },
+  { title: 'Læring og utvikling', items: ['Digital hjelp', 'Leksehjelp og språkhjelp', 'Kurs og opplæring', 'Motivator'] },
 ];
 
 export default function Forside() {
@@ -72,7 +82,7 @@ export default function Forside() {
     <div>
       <SEO
         title="Finn hjelp til hverdagen"
-        description="Rengjøring, snørydding, hagearbeid og småjobber — finn pålitelig hjelp nær deg."
+        description="Rengjøring, hagearbeid, småjobber, besøksvenn og mer — finn pålitelig hjelp nær deg."
         url="https://hverdagshjelp.no/"
         jsonLd={jsonLd}
       />
@@ -83,7 +93,7 @@ export default function Forside() {
             {'Finn pålitelig hjelp til hverdagen'}
           </h1>
           <p className="mt-4 text-lg text-white/80">
-            {'Rengjøring, snørydding, hagearbeid og småjobber — nær deg.'}
+            {'Praktisk hjelp, selskap og læring — nær deg.'}
           </p>
           <div className="mt-8">
             <SearchBar variant="large" />

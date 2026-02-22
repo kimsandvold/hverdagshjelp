@@ -24,13 +24,16 @@ export default function PublicLayout() {
   const fetchUnreadCount = useMessagesStore((state) => state.fetchUnreadCount)
   const bookingUpdatedCount = useBookingStore((state) => state.updatedCount)
   const fetchUpdatedCount = useBookingStore((state) => state.fetchUpdatedCount)
+  const incomingPendingCount = useBookingStore((state) => state.incomingPendingCount)
+  const fetchIncomingPendingCount = useBookingStore((state) => state.fetchIncomingPendingCount)
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchUnreadCount()
       fetchUpdatedCount()
+      fetchIncomingPendingCount()
     }
-  }, [isAuthenticated, fetchUnreadCount, fetchUpdatedCount])
+  }, [isAuthenticated, fetchUnreadCount, fetchUpdatedCount, fetchIncomingPendingCount])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -196,6 +199,11 @@ export default function PublicLayout() {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
                             </svg>
                             Forespørsler
+                            {incomingPendingCount > 0 && (
+                              <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
+                                {incomingPendingCount > 9 ? '9+' : incomingPendingCount}
+                              </span>
+                            )}
                           </Link>
                           <Link to="/dashboard/subscription" className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                             <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -357,8 +365,13 @@ export default function PublicLayout() {
                     <NavLink to="/dashboard/services" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                       Mine tjenester
                     </NavLink>
-                    <NavLink to="/dashboard/bookings" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    <NavLink to="/dashboard/bookings" className={({ isActive }) => `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                       Forespørsler
+                      {incomingPendingCount > 0 && (
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
+                          {incomingPendingCount > 9 ? '9+' : incomingPendingCount}
+                        </span>
+                      )}
                     </NavLink>
                     <NavLink to="/dashboard/subscription" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                       Abonnement

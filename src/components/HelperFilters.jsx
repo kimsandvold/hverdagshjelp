@@ -91,7 +91,7 @@ export default function HelperFilters() {
   const [mapLoading, setMapLoading] = useState(true);
 
   // Place search state
-  const [placeQuery, setPlaceQuery] = useState('');
+  const [placeQuery, setPlaceQuery] = useState(locationStore.locationLabel || '');
   const [placeResults, setPlaceResults] = useState([]);
   const [placeSearching, setPlaceSearching] = useState(false);
 

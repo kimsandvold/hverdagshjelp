@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useBookingStore from '../../stores/useBookingStore';
+import useMessagesStore from '../../stores/useMessagesStore';
 
 const statusLabels = {
   pending: 'Venter på svar',
@@ -20,6 +21,15 @@ const statusColors = {
 
 export default function MyBookingsPage() {
   const { bookings, loading, fetchMyBookings, markBookingsSeen } = useBookingStore();
+  const startConversation = useMessagesStore((state) => state.startConversation);
+  const navigate = useNavigate();
+
+  const handleSendMessage = async (helperId) => {
+    const result = await startConversation(helperId);
+    if (result.conversationId) {
+      navigate('/meldinger');
+    }
+  };
 
   useEffect(() => {
     fetchMyBookings();
@@ -95,9 +105,20 @@ export default function MyBookingsPage() {
                 </div>
               )}
 
-              <p className="mt-2 text-xs text-gray-400">
-                {new Date(booking.created_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-xs text-gray-400">
+                  {new Date(booking.created_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+                <button
+                  onClick={() => handleSendMessage(booking.helper_id)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 cursor-pointer"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                  </svg>
+                  Send melding
+                </button>
+              </div>
             </div>
           ))}
         </div>

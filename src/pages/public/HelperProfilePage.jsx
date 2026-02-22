@@ -4,13 +4,26 @@ import useHelperStore from '../../stores/useHelperStore';
 import useFavoritesStore from '../../stores/useFavoritesStore';
 import useAuthStore from '../../stores/useAuthStore';
 import useBookingStore from '../../stores/useBookingStore';
+import useReferencesStore from '../../stores/useReferencesStore';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import categoryIcons from '../../data/categoryIcons';
+import { AVATAR_COLORS } from '../../components/HelperCard';
 import { supabase } from '../../lib/supabase';
 import SEO from '../../components/SEO';
 
 const availabilityLabels = { dag: 'Dag', kveld: 'Kveld', natt: 'Natt', hverdager: 'Hverdager', helg: 'Helg' };
+
+function calculateAge(birthDate) {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
 
 export default function HelperProfilePage() {
   const { id } = useParams();
@@ -25,6 +38,21 @@ export default function HelperProfilePage() {
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
 
   const createBooking = useBookingStore((state) => state.createBooking);
+
+  const references = useReferencesStore((state) => state.references);
+  const referencesLoading = useReferencesStore((state) => state.loading);
+  const canOffer = useReferencesStore((state) => state.canOffer);
+  const hasOffered = useReferencesStore((state) => state.hasOffered);
+  const fetchReferences = useReferencesStore((state) => state.fetchReferences);
+  const checkEligibility = useReferencesStore((state) => state.checkEligibility);
+  const addReference = useReferencesStore((state) => state.addReference);
+  const deleteReference = useReferencesStore((state) => state.deleteReference);
+
+  // Reference modal state
+  const [showRefModal, setShowRefModal] = useState(false);
+  const [refMessage, setRefMessage] = useState('');
+  const [refSubmitting, setRefSubmitting] = useState(false);
+  const [refError, setRefError] = useState('');
 
   // Request form state
   const [showPhoneInput, setShowPhoneInput] = useState(false);
@@ -47,6 +75,14 @@ export default function HelperProfilePage() {
     });
     return () => { cancelled = true; };
   }, [id, getHelperById]);
+
+  // Fetch references + check eligibility
+  useEffect(() => {
+    if (id) {
+      fetchReferences(id);
+      if (isAuthenticated) checkEligibility(id);
+    }
+  }, [id, isAuthenticated, fetchReferences, checkEligibility]);
 
   // Log profile view (authenticated users viewing other profiles)
   useEffect(() => {
@@ -74,6 +110,24 @@ export default function HelperProfilePage() {
       setTimeout(() => setBookingSuccess(false), 3000);
     }
     setBookingSubmitting(false);
+  };
+
+  const handleSubmitReference = async (e) => {
+    e.preventDefault();
+    if (!refMessage.trim()) {
+      setRefError('Skriv en kort melding');
+      return;
+    }
+    setRefError('');
+    setRefSubmitting(true);
+    const result = await addReference(id, refMessage.trim());
+    if (result.error) {
+      setRefError(result.error);
+    } else {
+      setShowRefModal(false);
+      setRefMessage('');
+    }
+    setRefSubmitting(false);
   };
 
   const helperJsonLd = helper ? {
@@ -128,6 +182,7 @@ export default function HelperProfilePage() {
     .split(' ')
     .map((n) => n.charAt(0).toUpperCase())
     .join('');
+  const avatarStyle = AVATAR_COLORS[helper.avatar_color] || null;
 
   const descriptionExcerpt = helper.description
     ? helper.description.slice(0, 160).trim() + (helper.description.length > 160 ? '...' : '')
@@ -160,9 +215,13 @@ export default function HelperProfilePage() {
               src={helper.avatar_url}
               alt={helper.name}
               className="h-24 w-24 flex-shrink-0 rounded-full object-cover"
+              style={avatarStyle ? { border: `3px solid ${avatarStyle.border}` } : undefined}
             />
           ) : (
-            <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full bg-primary-200 text-2xl font-bold text-primary-700">
+            <div
+              className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full text-2xl font-bold bg-primary-200 text-primary-700"
+              style={avatarStyle ? { backgroundColor: avatarStyle.bg, color: avatarStyle.text } : undefined}
+            >
               {initials}
             </div>
           )}
@@ -203,6 +262,26 @@ export default function HelperProfilePage() {
             {helper.location && (
               <p className="mt-3 text-sm text-gray-600">{helper.location}</p>
             )}
+
+            {/* Age & Languages */}
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+              {helper.birth_date && (
+                <span className="text-sm text-gray-500">{calculateAge(helper.birth_date)} år</span>
+              )}
+              {helper.languages?.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {helper.languages.map((lang, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"
+                    >
+                      {lang.language}
+                      <span className="text-[10px] text-gray-400">({lang.type})</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -388,8 +467,96 @@ export default function HelperProfilePage() {
           </div>
         )}
 
+        {/* References section */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Referanser{!referencesLoading && ` (${references.length})`}
+          </h2>
+
+          {referencesLoading ? (
+            <div className="mt-4 flex justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+            </div>
+          ) : references.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-400">Ingen referanser ennå.</p>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {references.map((ref) => (
+                <div key={ref.id} className="flex gap-3">
+                  {ref.userAvatar ? (
+                    <img src={ref.userAvatar} alt={ref.userName} className="h-10 w-10 flex-shrink-0 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-700">
+                      {ref.userName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-900">{ref.userName}</span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(ref.createdAt).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-sm text-gray-600 italic">&laquo;{ref.message}&raquo;</p>
+                    {isAuthenticated && user?.id === ref.userId && (
+                      <button
+                        type="button"
+                        onClick={() => deleteReference(ref.id)}
+                        className="mt-1 text-xs text-red-500 hover:underline cursor-pointer"
+                      >
+                        Fjern referanse
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CTA / status */}
+          {isAuthenticated && user?.id !== id && canOffer && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => setShowRefModal(true)}
+            >
+              Tilby deg som referanse
+            </Button>
+          )}
+          {isAuthenticated && user?.id !== id && hasOffered && (
+            <p className="mt-4 text-sm text-gray-400">Du har allerede tilbudt deg som referanse.</p>
+          )}
+        </div>
 
       </div>
+
+      {/* Reference modal */}
+      <Modal isOpen={showRefModal} onClose={() => setShowRefModal(false)} title="Tilby deg som referanse">
+        <form onSubmit={handleSubmitReference} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700">Din melding</label>
+            <textarea
+              rows={4}
+              maxLength={500}
+              value={refMessage}
+              onChange={(e) => setRefMessage(e.target.value)}
+              placeholder="Skriv kort om din erfaring med denne hjelperen..."
+              className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+            <p className="mt-1 text-right text-xs text-gray-400">{refMessage.length}/500</p>
+          </div>
+          {refError && <p className="text-sm text-red-600">{refError}</p>}
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" size="sm" type="button" onClick={() => setShowRefModal(false)}>
+              Avbryt
+            </Button>
+            <Button variant="primary" size="sm" type="submit" disabled={refSubmitting || !refMessage.trim()}>
+              {refSubmitting ? 'Sender...' : 'Send referanse'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
     </div>
   );

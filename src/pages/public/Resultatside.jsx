@@ -39,12 +39,15 @@ export default function Resultatside() {
       const lngNum = parseFloat(lng);
       const radiusNum = parseFloat(radius);
       setGeoFilter(latNum, lngNum, radiusNum);
-      locationStore.setLocation({
-        lat: latNum,
-        lng: lngNum,
-        radiusKm: radiusNum,
-        locationLabel: `${radiusNum} km radius`,
-      });
+      // Only update location store if coords actually changed — preserve existing label
+      if (locationStore.lat !== latNum || locationStore.lng !== lngNum || locationStore.radiusKm !== radiusNum) {
+        locationStore.setLocation({
+          lat: latNum,
+          lng: lngNum,
+          radiusKm: radiusNum,
+          locationLabel: locationStore.locationLabel || `${radiusNum} km radius`,
+        });
+      }
     } else {
       const location = searchParams.get('location') || '';
       if (location) {

@@ -52,9 +52,9 @@ const useAuthStore = create((set, get) => ({
     }
 
     if (profile) {
-      // For helpers, fetch onboarding_completed flag
+      // For helpers/admins with helper record, fetch onboarding_completed flag
       let onboardingCompleted = null
-      if (profile.role === 'helper') {
+      if (profile.role === 'helper' || profile.role === 'admin') {
         const { data: helper } = await supabase
           .from('helpers')
           .select('onboarding_completed')
@@ -103,8 +103,15 @@ const useAuthStore = create((set, get) => ({
 
     if (existing) return
 
-    // Upgrade profile role to helper
-    await supabase.from('profiles').update({ role: 'helper' }).eq('id', userId)
+    // Upgrade profile role to helper (skip if already admin)
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()
+    if (currentProfile?.role !== 'admin') {
+      await supabase.from('profiles').update({ role: 'helper' }).eq('id', userId)
+    }
 
     // Create empty helper shell
     const helperData = {

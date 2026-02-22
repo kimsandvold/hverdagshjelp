@@ -3,8 +3,33 @@ import Badge from './ui/Badge';
 import useFavoritesStore from '../stores/useFavoritesStore';
 import useAuthStore from '../stores/useAuthStore';
 
+function calculateAge(birthDate) {
+  if (!birthDate) return null;
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+const AVATAR_COLORS = {
+  blue:   { bg: '#bfdbfe', text: '#1d4ed8', border: '#60a5fa' },
+  green:  { bg: '#bbf7d0', text: '#15803d', border: '#4ade80' },
+  purple: { bg: '#e9d5ff', text: '#7e22ce', border: '#c084fc' },
+  rose:   { bg: '#fecdd3', text: '#be123c', border: '#fb7185' },
+  amber:  { bg: '#fde68a', text: '#b45309', border: '#fbbf24' },
+  teal:   { bg: '#99f6e4', text: '#0f766e', border: '#2dd4bf' },
+  indigo: { bg: '#c7d2fe', text: '#4338ca', border: '#818cf8' },
+  orange: { bg: '#fed7aa', text: '#c2410c', border: '#fb923c' },
+};
+
+export { AVATAR_COLORS };
+
 export default function HelperCard({ helper }) {
   const firstLetter = helper.name?.charAt(0)?.toUpperCase() ?? '?';
+  const colorKey = helper.avatar_color;
+  const avatarStyle = AVATAR_COLORS[colorKey] || null;
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isFavorite = useFavoritesStore((state) => state.isFavorite(helper.id));
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
@@ -37,9 +62,13 @@ export default function HelperCard({ helper }) {
             src={helper.avatar_url}
             alt={helper.name}
             className="h-11 w-11 sm:h-14 sm:w-14 flex-shrink-0 rounded-full object-cover"
+            style={avatarStyle ? { border: `2.5px solid ${avatarStyle.border}` } : undefined}
           />
         ) : (
-          <div className="flex h-11 w-11 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary-200 text-base sm:text-lg font-bold text-primary-700">
+          <div
+            className="flex h-11 w-11 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-full text-base sm:text-lg font-bold bg-primary-200 text-primary-700"
+            style={avatarStyle ? { backgroundColor: avatarStyle.bg, color: avatarStyle.text } : undefined}
+          >
             {firstLetter}
           </div>
         )}
@@ -51,9 +80,24 @@ export default function HelperCard({ helper }) {
               <h3 className="text-base font-semibold text-gray-900 truncate">
                 {helper.name}
               </h3>
-              {(helper.location || helper.location_label) && (
-                <p className="mt-0.5 text-sm text-gray-500 truncate">{helper.location || helper.location_label}</p>
-              )}
+              {/* Location | Age | Languages */}
+              <p className="mt-0.5 flex flex-wrap items-center gap-y-0.5 text-xs text-gray-400">
+                {(helper.location || helper.location_label) && (
+                  <span className="text-sm text-gray-500">{helper.location || helper.location_label}</span>
+                )}
+                {helper.birth_date && (
+                  <>
+                    {(helper.location || helper.location_label) && <span className="mx-1.5 text-gray-300">|</span>}
+                    <span>{calculateAge(helper.birth_date)} år</span>
+                  </>
+                )}
+                {helper.languages?.length > 0 && (
+                  <>
+                    {(helper.location || helper.location_label || helper.birth_date) && <span className="mx-1.5 text-gray-300">|</span>}
+                    <span>{helper.languages.map((l) => l.language).join(', ')}</span>
+                  </>
+                )}
+              </p>
             </div>
 
             {/* Badges + Bookmark */}
