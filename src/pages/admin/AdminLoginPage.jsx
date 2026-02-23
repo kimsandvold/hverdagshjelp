@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-primary-500">Hverdagshjelp</h1>
+          <h1 className="text-2xl font-bold text-primary-500">Din Helt</h1>
           <span className="mt-1 inline-block rounded bg-accent-500 px-2 py-0.5 text-xs font-semibold text-white">
             Admin
           </span>
@@ -98,7 +98,7 @@ export default function AdminLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@hverdagshjelp.no"
+                placeholder="admin@dinhelt.no"
                 required
                 className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
               />

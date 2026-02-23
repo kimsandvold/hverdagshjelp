@@ -12,6 +12,7 @@ import categoryIcons from '../../data/categoryIcons';
 import { AVATAR_COLORS } from '../../components/HelperCard';
 import { supabase } from '../../lib/supabase';
 import SEO from '../../components/SEO';
+import ShareButtons from '../../components/ui/ShareButtons';
 
 const availabilityLabels = { dag: 'Dag', kveld: 'Kveld', natt: 'Natt', hverdager: 'Hverdager', helg: 'Helg' };
 
@@ -134,7 +135,7 @@ export default function HelperProfilePage() {
     '@context': 'https://schema.org',
     '@type': 'Service',
     name: `${helper.name} — Hjelper`,
-    description: helper.description || `Hjelper tilgjengelig på Hverdagshjelp.no`,
+    description: helper.description || `Hjelper tilgjengelig på Din Helt`,
     provider: {
       '@type': 'Person',
       name: helper.name,
@@ -186,14 +187,14 @@ export default function HelperProfilePage() {
 
   const descriptionExcerpt = helper.description
     ? helper.description.slice(0, 160).trim() + (helper.description.length > 160 ? '...' : '')
-    : `Hjelper tilgjengelig på Hverdagshjelp.no`;
+    : `Hjelper tilgjengelig på Din Helt`;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <SEO
         title={`${helper.name} — Hjelper`}
         description={descriptionExcerpt}
-        url={`https://hverdagshjelp.no/helper/${id}`}
+        url={`https://dinhelt.no/helper/${id}`}
         jsonLd={helperJsonLd}
       />
       <Link
@@ -230,25 +231,32 @@ export default function HelperProfilePage() {
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <h1 className="text-2xl font-bold text-gray-900">{helper.name}</h1>
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => toggleFavorite(id)}
-                  className="rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer"
-                  title={isFavorite ? 'Fjern fra lagrede' : 'Lagre hjelper'}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 ${isFavorite ? 'fill-primary-500 text-primary-500' : 'text-gray-400'}`}
-                    viewBox="0 0 24 24"
-                    fill={isFavorite ? 'currentColor' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth={2}
+              <div className="flex items-center gap-1">
+                <ShareButtons
+                  variant="compact"
+                  title={`${helper.name} — Hjelper på Din Helt`}
+                  text={`Sjekk ut ${helper.name} på Din Helt:`}
+                />
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(id)}
+                    className="rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer"
+                    title={isFavorite ? 'Fjern fra lagrede' : 'Lagre hjelper'}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                </button>
-              )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-6 w-6 ${isFavorite ? 'fill-primary-500 text-primary-500' : 'text-gray-400'}`}
+                      viewBox="0 0 24 24"
+                      fill={isFavorite ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Badges */}

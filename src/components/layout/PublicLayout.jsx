@@ -35,10 +35,11 @@ export default function PublicLayout() {
     }
   }, [isAuthenticated, fetchUnreadCount, fetchUpdatedCount, fetchIncomingPendingCount])
 
-  // Close mobile menu on route change
+  // Close mobile menu + scroll to top on route change
   useEffect(() => {
     setMobileMenuOpen(false)
     setUserMenuOpen(false)
+    window.scrollTo(0, 0)
   }, [location.pathname])
 
   // Scroll-aware navbar
@@ -450,18 +451,20 @@ export default function PublicLayout() {
             </ul>
           </div>
 
-          {/* Info */}
+          {/* Recruit + contact */}
           <div>
-            <h4 className="font-semibold mb-3">Kontakt</h4>
-            <ul className="space-y-2 text-sm text-primary-200">
-              <li>post@hverdagshjelp.no</li>
-              <li>Oslo, Norge</li>
-            </ul>
+            <h4 className="font-semibold mb-3">Bli med</h4>
+            <p className="text-sm text-primary-200 leading-relaxed">
+              Vi bygger et nettverk av folk som hjelper hverandre. Har du noe å tilby?{' '}
+              <Link to="/voks-sammen" className="font-medium text-accent-300 hover:text-accent-200 transition-colors">
+                Les mer
+              </Link>
+            </p>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-primary-600 text-center text-sm text-primary-300">
-          &copy; 2025 Hverdagshjelp.no
+          &copy; 2025 Din Helt
         </div>
       </footer>
     </div>

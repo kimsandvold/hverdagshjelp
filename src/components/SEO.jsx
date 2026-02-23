@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
-const SITE_NAME = 'Hverdagshjelp.no';
-const DEFAULT_IMAGE = 'https://hverdagshjelp.no/og-image.png';
+const SITE_NAME = 'Din Helt';
+const DEFAULT_IMAGE = 'https://dinhelt.no/og-image.png';
 
 export default function SEO({
   title,

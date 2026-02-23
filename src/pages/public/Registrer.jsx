@@ -110,7 +110,7 @@ export default function Registrer() {
       <SEO
         title="Registrer deg som hjelper"
         description="Opprett en hjelperprofil og kom i gang."
-        url="https://hverdagshjelp.no/registrer"
+        url="https://dinhelt.no/registrer"
       />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Opprett hjelper-konto</h1>
 

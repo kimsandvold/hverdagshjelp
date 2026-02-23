@@ -1,52 +1,28 @@
 import { Link } from 'react-router-dom'
 
 export default function Logo({ to = '/', className = '', light = false }) {
-  const iconColor = light ? '#ffffff' : '#1e3a5f'
-  const textColor = light
-    ? 'text-white'
-    : 'text-primary-500'
+  const bgColor = light ? '#ffffff' : '#1F4163'
+  const fgColor = light ? '#1F4163' : '#ffffff'
+  const textColor = light ? 'text-white' : 'text-primary-500'
 
   return (
     <Link to={to} className={`flex items-center gap-2.5 ${className}`}>
       <svg
-        viewBox="0 0 36 36"
+        viewBox="0 0 100 100"
         className="h-8 w-8 shrink-0"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Rounded square background */}
-        <rect width="36" height="36" rx="8" fill={iconColor} />
-
-        {/* H monogram with house-roof crossbar */}
-        {/* Left vertical bar */}
-        <line
-          x1="12" y1="9"
-          x2="12" y2="27"
-          stroke={light ? '#1e3a5f' : '#ffffff'}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-        {/* Right vertical bar */}
-        <line
-          x1="24" y1="9"
-          x2="24" y2="27"
-          stroke={light ? '#1e3a5f' : '#ffffff'}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-        {/* Roof-shaped crossbar */}
+        <rect width="100" height="100" rx="22" fill={bgColor} />
         <path
-          d="M12 20 L18 14 L24 20"
-          stroke={light ? '#1e3a5f' : '#ffffff'}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M50 82 C50 82 14 58 14 36 C14 24 22 16 33 16 C40 16 46 20 50 26 C54 20 60 16 67 16 C78 16 86 24 86 36 C86 58 50 82 50 82 Z"
+          fill={fgColor}
         />
       </svg>
 
       <span className={`text-xl font-bold tracking-tight ${textColor}`}>
-        Hverdagshjelp
+        Din Helt
       </span>
     </Link>
   )

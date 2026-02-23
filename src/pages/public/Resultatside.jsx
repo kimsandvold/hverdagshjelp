@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import useHelperStore from '../../stores/useHelperStore';
 import useLocationStore from '../../stores/useLocationStore';
 import HelperCard from '../../components/HelperCard';
@@ -8,6 +8,7 @@ import SearchBar from '../../components/ui/SearchBar';
 import Button from '../../components/ui/Button';
 import SEO from '../../components/SEO';
 import MinioAd from '../../components/MinioAd';
+import ShareButtons from '../../components/ui/ShareButtons';
 
 export default function Resultatside() {
   const [searchParams] = useSearchParams();
@@ -62,12 +63,24 @@ export default function Resultatside() {
   }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 overflow-hidden">
+    <>
       <SEO
         title="Finn din hjelper"
         description="Finn hjelpere nær deg for hverdagslige oppgaver."
-        url="https://hverdagshjelp.no/search"
+        url="https://dinhelt.no/search"
       />
+
+      {/* Search hero banner */}
+      <div className="bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 py-8 sm:py-10 px-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-4">
+            Finn den rette hjelperen for deg
+          </h1>
+          <SearchBar variant="small" initialQuery={searchParams.get('q') || ''} />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 overflow-hidden">
       <div className="flex gap-8">
         {/* Sidebar filters - desktop */}
         <aside className="hidden w-72 flex-shrink-0 lg:block">
@@ -99,17 +112,13 @@ export default function Resultatside() {
         )}
 
         {/* Results area */}
-        <div className="flex-1">
-          <div className="mb-4">
-            <SearchBar variant="small" initialQuery={searchParams.get('q') || ''} />
-          </div>
-
+        <div className="flex-1 min-w-0">
           <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3">
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
+            <p className="text-sm sm:text-base font-medium text-gray-500">
               {loading && helpers.length === 0
                 ? 'Søker...'
                 : `${helpers.length} ${helpers.length === 1 ? 'hjelper funnet' : 'hjelpere funnet'}`}
-            </h1>
+            </p>
             <button
               onClick={() => setShowFilters(true)}
               className="inline-flex flex-shrink-0 items-center gap-2 rounded-lg border border-gray-300 px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 lg:hidden"
@@ -161,5 +170,57 @@ export default function Resultatside() {
         </div>
       </div>
     </div>
+
+    {/* Recruit helpers banner */}
+    <div className="mx-auto max-w-7xl px-4 pb-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 px-6 py-10 sm:px-12 sm:py-14">
+        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/5" />
+        <div className="absolute -bottom-8 -left-8 h-36 w-36 rounded-full bg-white/5" />
+        <div className="relative mx-auto max-w-2xl text-center">
+          <p className="text-sm font-medium uppercase tracking-wider text-accent-300">
+            Vi bygger noe sammen
+          </p>
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
+            Har du noe å tilby?
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/70">
+            Jo flere hjelpere som melder seg, jo bedre blir plattformen for alle — flere kunder, flere oppdrag, mer synlighet.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <Link
+              to="/bli-hjelper"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
+            >
+              Bli en del av nettverket
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+            <Link
+              to="/voks-sammen"
+              className="text-sm font-medium text-white/60 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white/90"
+            >
+              Les om hvorfor det betyr noe
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Share */}
+    <div className="mx-auto max-w-7xl px-4 pb-8">
+      <div className="rounded-xl bg-white p-6 text-center shadow-sm">
+        <p className="mb-4 text-sm font-medium text-gray-500">
+          Kjenner du noen som trenger hjelp — eller noen som kan hjelpe? Del siden.
+        </p>
+        <div className="flex justify-center">
+          <ShareButtons
+            title="Din Helt — Finn pålitelig hjelp til hverdagen"
+            text="Finn hjelp til hverdagen, eller meld deg som hjelper:"
+          />
+        </div>
+      </div>
+    </div>
+    </>
   );
 }

@@ -27,8 +27,8 @@ export default function SearchBar({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`w-full rounded-2xl bg-white shadow-sm ${
-        isLarge ? 'p-4 sm:p-5 shadow-lg' : 'p-3 sm:p-4'
+      className={`w-full rounded-2xl bg-white ${
+        isLarge ? 'p-4 sm:p-5 shadow-lg' : 'p-3 sm:p-4 shadow-md'
       }`}
     >
       <div className="flex items-center gap-3">

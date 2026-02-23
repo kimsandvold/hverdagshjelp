@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
 
-export default function MinioAd() {
-  const [ad, setAd] = useState(null);
-
-  useEffect(() => {
-    supabase
-      .from('ads')
-      .select('*')
-      .eq('active', true)
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setAd(data[Math.floor(Math.random() * data.length)]);
-        }
-      });
-  }, []);
-
-  if (!ad) return null;
-
+function AdCard({ ad }) {
   return (
     <a
       href={ad.href}
@@ -71,5 +59,44 @@ export default function MinioAd() {
         </div>
       </div>
     </a>
+  );
+}
+
+export default function MinioAd() {
+  const [ads, setAds] = useState([]);
+
+  useEffect(() => {
+    supabase
+      .from('ads')
+      .select('*')
+      .eq('active', true)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setAds(data);
+        }
+      });
+  }, []);
+
+  if (ads.length === 0) return null;
+
+  if (ads.length === 1) return <AdCard ad={ads[0]} />;
+
+  return (
+    <div className="w-full min-w-0 overflow-hidden">
+      <Swiper
+        modules={[Autoplay, EffectFade]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        autoplay={{ delay: 10000, disableOnInteraction: false }}
+        loop
+        speed={800}
+      >
+        {ads.map((ad) => (
+          <SwiperSlide key={ad.id}>
+            <AdCard ad={ad} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 }

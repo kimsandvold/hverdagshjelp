@@ -273,7 +273,7 @@ export default function HelperFilters() {
             <p className="text-xs text-gray-500">Henter posisjon...</p>
           </div>
         ) : mapCenter ? (
-          <div className="h-44 w-full overflow-hidden rounded-lg">
+          <div className="relative z-0 h-44 w-full overflow-hidden rounded-lg">
             <MapContainer
               center={[mapCenter.lat, mapCenter.lng]}
               zoom={locationStore.isSet ? 11 : 5}

@@ -3,4 +3,4 @@ Allow: /
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /auth/callback
-Sitemap: https://hverdagshjelp.no/sitemap.xml
+Sitemap: https://dinhelt.no/sitemap.xml

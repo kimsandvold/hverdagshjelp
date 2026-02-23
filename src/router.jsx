@@ -22,6 +22,7 @@ import AdminCategories from './pages/admin/AdminCategories'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminAds from './pages/admin/AdminAds'
 import BliHjelper from './pages/public/BliHjelper'
+import VoksSammen from './pages/public/VoksSammen'
 import Registrer from './pages/public/Registrer'
 import FavoritesPage from './pages/public/FavoritesPage'
 import MessagesPage from './pages/public/MessagesPage'
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: '/search', element: <LoginWall><Resultatside /></LoginWall> },
       { path: '/helper/:id', element: <LoginWall><HelperProfilePage /></LoginWall> },
       { path: '/bli-hjelper', element: <BliHjelper /> },
+      { path: '/voks-sammen', element: <VoksSammen /> },
       { path: '/registrer', element: <Registrer /> },
       { path: '/registrer/:ref', element: <Registrer /> },
       { path: '/login', element: <LoginPage /> },

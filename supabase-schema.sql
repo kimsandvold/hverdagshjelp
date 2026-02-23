@@ -830,6 +830,11 @@ declare
   current_count int;
   helper_tier text;
 begin
+  -- Free premium period: skip limits before 2026-06-01
+  if now() < '2026-06-01'::timestamptz then
+    return new;
+  end if;
+
   select count(*) into current_count
   from helper_services
   where helper_id = new.helper_id;

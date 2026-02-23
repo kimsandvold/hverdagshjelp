@@ -85,8 +85,8 @@ export default function LoginPage() {
     <div className="mx-auto mt-16 max-w-md px-4">
       <SEO
         title="Logg inn"
-        description="Logg inn på Hverdagshjelp.no"
-        url="https://hverdagshjelp.no/login"
+        description="Logg inn på Din Helt"
+        url="https://dinhelt.no/login"
       />
       <div className="rounded-xl bg-white p-8 shadow-sm">
         <h1 className="mb-2 text-center text-xl font-bold text-gray-900">

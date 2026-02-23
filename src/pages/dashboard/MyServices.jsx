@@ -57,8 +57,9 @@ export default function MyServices() {
     setSaving(false);
   };
 
+  const paidPlansAvailable = new Date() >= new Date('2026-06-01');
   const categoryLimits = { free: 2, basic: 5, premium: Infinity };
-  const maxCategories = categoryLimits[helper?.tier] ?? 2;
+  const maxCategories = !paidPlansAvailable ? Infinity : (categoryLimits[helper?.tier] ?? 2);
 
   const handleToggleService = (categorySlug) => {
     setServices((prev) => {
