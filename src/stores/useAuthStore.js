@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import useFavoritesStore from './useFavoritesStore'
+import { subscribeToNewsletter } from '../services/newsletterService'
 
 const useAuthStore = create((set, get) => ({
   user: null,
@@ -154,6 +155,12 @@ const useAuthStore = create((set, get) => ({
         user_name: name,
         user_email: email,
       })
+      subscribeToNewsletter(email)
+    }
+
+    // If no session, email confirmation is required
+    if (!authData.session) {
+      return { success: true, confirmEmail: true }
     }
 
     return { success: true }
@@ -200,6 +207,13 @@ const useAuthStore = create((set, get) => ({
 
     const { error: helperError } = await supabase.from('helpers').insert(helperData)
     if (helperError) return { success: false, error: helperError.message }
+
+    subscribeToNewsletter(email)
+
+    // If no session, email confirmation is required
+    if (!authData.session) {
+      return { success: true, confirmEmail: true }
+    }
 
     return { success: true }
   },

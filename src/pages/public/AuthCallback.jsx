@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import useAuthStore from '../../stores/useAuthStore'
+import { subscribeToNewsletter } from '../../services/newsletterService'
 
 function getRedirectPath() {
   const { profile, onboardingCompleted } = useAuthStore.getState()
@@ -48,6 +49,10 @@ export default function AuthCallback() {
         // If registering as helper via Google, ensure helper record exists
         if (intent === 'helper') {
           await useAuthStore.getState()._ensureHelperRecord(user.id, referredBy || null)
+        }
+
+        if (user.email) {
+          subscribeToNewsletter(user.email)
         }
 
         await useAuthStore.getState().initialize()

@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { loginUser, registerUser, googleLogin } = useAuthStore();
   const navigate = useNavigate();
@@ -57,7 +58,11 @@ export default function LoginPage() {
       }
       const result = await registerUser({ name: name.trim(), email, password });
       if (result.success) {
-        navigate(redirectTo);
+        if (result.confirmEmail) {
+          setConfirmEmail(true);
+        } else {
+          navigate(redirectTo);
+        }
       } else {
         setError(result.error);
       }
@@ -89,6 +94,28 @@ export default function LoginPage() {
         url="https://dinhelt.no/login"
       />
       <div className="rounded-xl bg-white p-8 shadow-sm">
+        {confirmEmail ? (
+          <div className="text-center py-4">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Sjekk e-posten din</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Vi har sendt en bekreftelseslenke til <strong>{email}</strong>. Klikk på lenken for å aktivere kontoen din.
+            </p>
+            <p className="mt-4 text-xs text-gray-400">Sjekk søppelpost-mappen hvis du ikke finner e-posten.</p>
+            <button
+              type="button"
+              onClick={() => { setConfirmEmail(false); setMode('login'); }}
+              className="mt-6 text-sm font-medium text-primary-500 hover:text-primary-600"
+            >
+              Tilbake til innlogging
+            </button>
+          </div>
+        ) : (
+        <>
         <h1 className="mb-2 text-center text-xl font-bold text-gray-900">
           {mode === 'login' ? 'Logg inn' : 'Opprett konto'}
         </h1>
@@ -196,6 +223,8 @@ export default function LoginPage() {
             </>
           )}
         </p>
+        </>
+        )}
       </div>
     </div>
   );

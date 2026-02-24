@@ -36,6 +36,7 @@ export default function Registrer() {
   });
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { ref: referralCode } = useParams();
   const [referrer, setReferrer] = useState(null);
@@ -99,7 +100,11 @@ export default function Registrer() {
     });
 
     if (result.success) {
-      navigate('/onboarding');
+      if (result.confirmEmail) {
+        setConfirmEmail(true);
+      } else {
+        navigate('/onboarding');
+      }
     } else {
       setError(result.error);
     }
@@ -116,6 +121,27 @@ export default function Registrer() {
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Opprett hjelper-konto</h1>
 
       <div className="space-y-5 rounded-xl bg-white p-6 shadow-sm sm:p-8">
+        {confirmEmail ? (
+          <div className="text-center py-4">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Sjekk e-posten din</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Vi har sendt en bekreftelseslenke til <strong>{formData.email}</strong>. Klikk på lenken for å aktivere kontoen din.
+            </p>
+            <p className="mt-4 text-xs text-gray-400">Sjekk søppelpost-mappen hvis du ikke finner e-posten.</p>
+            <a
+              href="/login"
+              className="mt-6 inline-block text-sm font-medium text-primary-500 hover:text-primary-600"
+            >
+              Gå til innlogging
+            </a>
+          </div>
+        ) : (
+        <>
         {/* Consent */}
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-left transition-colors hover:bg-gray-100">
           <input
@@ -237,6 +263,8 @@ export default function Registrer() {
             </a>
           </p>
         </form>
+        </>
+        )}
       </div>
     </div>
   );
