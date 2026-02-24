@@ -85,7 +85,7 @@ export default function LoginPage() {
     <div className="mx-auto mt-16 max-w-md px-4">
       <SEO
         title="Logg inn"
-        description="Logg inn på Din Helt"
+        description="Logg inn på Din Helt for å finne hjelp eller administrere hjelperprofilen din."
         url="https://dinhelt.no/login"
       />
       <div className="rounded-xl bg-white p-8 shadow-sm">

@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import Button from '../../components/ui/Button';
+import { Link } from 'react-router-dom';
 import subscriptions from '../../data/subscriptions.json';
 import SEO from '../../components/SEO';
+import ShareButtons from '../../components/ui/ShareButtons';
 
 const steps = [
   {
@@ -62,15 +61,22 @@ const expectations = [
 ];
 
 export default function BliHjelper() {
-  const [accepted, setAccepted] = useState(false);
-  const navigate = useNavigate();
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Bli hjelper på Din Helt',
+    description: 'Registrer deg som hjelper og tjen penger på rengjøring, hagearbeid, småjobber, barnepass og mer i ditt nærområde.',
+    url: 'https://dinhelt.no/bli-hjelper',
+    isPartOf: { '@type': 'WebSite', name: 'Din Helt', url: 'https://dinhelt.no' },
+  };
 
   return (
     <div>
       <SEO
-        title="Bli hjelper"
-        description="Tjen penger på det du er god på — registrer deg som hjelper på Din Helt."
+        title="Bli hjelper — tjen penger på det du kan"
+        description="Registrer deg som hjelper og tjen penger på rengjøring, hagearbeid, småjobber, barnepass og mer i ditt nærområde."
         url="https://dinhelt.no/bli-hjelper"
+        jsonLd={jsonLd}
       />
 
       {/* Hero — CTA visible immediately */}
@@ -81,7 +87,7 @@ export default function BliHjelper() {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
-            Premium gratis frem til 1. juni 2026
+            Basis gratis frem til 1. juni 2026
           </div>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl">
             Bli hjelper på Din Helt
@@ -227,7 +233,7 @@ export default function BliHjelper() {
 
           <div className="mx-auto mt-8 max-w-xl rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-center">
             <p className="text-sm font-medium text-green-800">
-              Alle hjelpere får <strong>Premium gratis</strong> frem til <strong>1. juni 2026</strong>.
+              Alle hjelpere får <strong>Basis gratis</strong> frem til <strong>1. juni 2026</strong>.
               Deretter settes du automatisk over på gratisplanen.
             </p>
           </div>
@@ -274,36 +280,38 @@ export default function BliHjelper() {
         </div>
       </section>
 
+      {/* Share */}
+      <section className="bg-gray-50 px-4 py-12">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="mb-4 text-sm font-medium text-gray-500">
+            Kjenner du noen som burde bli hjelper? Del siden.
+          </p>
+          <div className="flex justify-center">
+            <ShareButtons
+              title="Bli hjelper på Din Helt — tjen penger på det du kan"
+              text="Registrer deg gratis som hjelper på Din Helt og bli synlig for kunder i ditt område:"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="bg-primary-500 px-4 py-16">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-2xl font-bold text-white">Klar til å starte?</h2>
-          <p className="mt-2 text-white/60">
-            Bekreft at du har forstått forventningene, så er du i gang.
+          <p className="mt-3 text-white/60">
+            Opprett en profil på noen minutter og bli synlig for kunder i ditt område.
           </p>
-          <label className="mt-8 flex cursor-pointer items-start gap-3 rounded-xl bg-white/10 p-4 text-left backdrop-blur-sm transition-colors hover:bg-white/15">
-            <input
-              type="checkbox"
-              checked={accepted}
-              onChange={(e) => setAccepted(e.target.checked)}
-              className="mt-0.5 h-5 w-5 accent-accent-500"
-            />
-            <span className="text-sm leading-relaxed text-white/80">
-              Jeg har lest og forstått informasjonen over, og forplikter meg til
-              å opptre ærlig og profesjonelt som hjelper på Din Helt.
-            </span>
-          </label>
-          <div className="mt-6">
-            <button
-              disabled={!accepted}
-              onClick={() => navigate('/registrer')}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+          <div className="mt-8">
+            <Link
+              to="/registrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
             >
-              Gå til registrering
+              Kom i gang gratis
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
       </section>

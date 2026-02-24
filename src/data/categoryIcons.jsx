@@ -34,11 +34,10 @@ const categoryIcons = {
       <path d="M14 6l4 5h-7" />
     </svg>
   ),
-  barnepass: (
+  fotografering: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 12a5 5 0 015-5h4a2 2 0 012 2v1a2 2 0 01-2 2h-1" />
-      <circle cx="9" cy="12" r="5" />
-      <path d="M7 10.5v0M11 10.5v0M7.5 14a2.5 2.5 0 003 0" />
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+      <circle cx="12" cy="13" r="4" />
     </svg>
   ),
   dyrepass: (

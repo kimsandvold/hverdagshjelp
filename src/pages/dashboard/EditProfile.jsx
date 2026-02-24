@@ -3,6 +3,7 @@ import useAuthStore from '../../stores/useAuthStore';
 import useHelperStore from '../../stores/useHelperStore';
 import Button from '../../components/ui/Button';
 import LocationPickerModal from '../../components/ui/LocationPickerModal';
+import SEO from '../../components/SEO';
 import { AVATAR_COLORS } from '../../components/HelperCard';
 import { supabase } from '../../lib/supabase';
 
@@ -262,6 +263,7 @@ export default function EditProfile() {
 
   return (
     <div className="py-8">
+      <SEO title="Rediger profil" description="Oppdater profilen din." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Profil</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-xl bg-white p-6 shadow-sm sm:p-8">

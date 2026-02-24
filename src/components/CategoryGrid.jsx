@@ -1,47 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import categoryIcons from '../data/categoryIcons';
-import { supabase } from '../lib/supabase';
-
-const INITIAL_COUNT = 12;
+import useAdminStore from '../stores/useAdminStore';
 
 export default function CategoryGrid({ variant = 'default' }) {
-  const [categories, setCategories] = useState([]);
-  const [showAll, setShowAll] = useState(false);
+  const categories = useAdminStore((state) => state.categories);
+  const fetchCategories = useAdminStore((state) => state.fetchCategories);
 
   useEffect(() => {
-    supabase
-      .from('categories')
-      .select('*')
-      .order('sort_order')
-      .then(({ data }) => setCategories(data || []));
-  }, []);
+    fetchCategories();
+  }, [fetchCategories]);
 
   if (variant === 'compact') {
-    const visible = showAll ? categories : categories.slice(0, INITIAL_COUNT);
     return (
-      <div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {visible.map((category) => (
-            <Link
-              key={category.id}
-              to={`/search?category=${category.slug}`}
-              className="flex flex-col items-center gap-2 rounded-lg bg-white/10 px-4 py-4 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
-            >
-              <div className="h-8 w-8">{categoryIcons[category.slug]}</div>
-              <span className="text-sm font-medium">{category.name}</span>
-            </Link>
-          ))}
-        </div>
-        {!showAll && categories.length > INITIAL_COUNT && (
-          <button
-            type="button"
-            onClick={() => setShowAll(true)}
-            className="mx-auto mt-4 block rounded-lg bg-white/10 px-6 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/20 hover:text-white cursor-pointer"
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            to={`/search?category=${category.slug}`}
+            className="flex flex-col items-center gap-2 rounded-lg bg-white/10 px-4 py-4 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
           >
-            Vis flere
-          </button>
-        )}
+            <div className="h-8 w-8">{categoryIcons[category.slug]}</div>
+            <span className="text-sm font-medium">{category.name}</span>
+          </Link>
+        ))}
       </div>
     );
   }

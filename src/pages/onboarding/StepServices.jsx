@@ -36,7 +36,15 @@ export default function StepServices({ helperData, onNext, onBack }) {
     }
   }, [helperData?.services])
 
-  const FREE_LIMIT = 2
+  const isFreePeriod = new Date() < new Date('2026-06-01')
+  const isAmbassador = helperData?.ambassador || false
+  const tierLimits = { free: 2, basic: 5, premium: Infinity }
+  const effectiveTier = isAmbassador
+    ? 'premium'
+    : isFreePeriod && (helperData?.tier === 'free' || !helperData?.tier)
+      ? 'basic'
+      : (helperData?.tier || 'free')
+  const FREE_LIMIT = tierLimits[effectiveTier] ?? 2
 
   const handleToggleService = (categorySlug) => {
     setServices((prev) => {
@@ -95,8 +103,12 @@ export default function StepServices({ helperData, onNext, onBack }) {
           Velg tjenester du tilbyr
         </label>
         <p className="mb-3 text-sm text-gray-500">
-          Du kan velge opptil {FREE_LIMIT} tjenester på gratisplanen.
-          {services.length >= FREE_LIMIT && (
+          {isAmbassador
+            ? 'Som ambassadør kan du velge ubegrenset antall tjenester.'
+            : isFreePeriod
+              ? `Du kan velge opptil ${FREE_LIMIT} tjenester i lanseringsperioden.`
+              : `Du kan velge opptil ${FREE_LIMIT} tjenester på gratisplanen.`}
+          {!isAmbassador && services.length >= FREE_LIMIT && (
             <span className="font-medium text-primary-600"> Oppgrader for flere.</span>
           )}
         </p>
@@ -232,6 +244,28 @@ export default function StepServices({ helperData, onNext, onBack }) {
                           ))}
                         </div>
                       )}
+                      {/* Suggested tags */}
+                      {cat.suggested_tags?.length > 0 && (
+                        <div className="mb-2">
+                          <span className="mb-1 block text-xs text-gray-400">Forslag:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {cat.suggested_tags
+                              .filter((st) => !service.tags.includes(st))
+                              .map((st) => (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={() =>
+                                    handleServiceField(service.category, 'tags', [...service.tags, st])
+                                  }
+                                  className="rounded-full border border-dashed border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-500 transition-colors hover:border-primary-400 hover:bg-primary-50 hover:text-primary-600 cursor-pointer"
+                                >
+                                  + {st}
+                                </button>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -240,7 +274,7 @@ export default function StepServices({ helperData, onNext, onBack }) {
                             setTagInputs((prev) => ({ ...prev, [service.category]: e.target.value }))
                           }
                           onKeyDown={(e) => handleTagKeyDown(e, service.category)}
-                          placeholder="f.eks. vinduspuss, dyprens..."
+                          placeholder="Eller skriv dine egne..."
                           className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                         />
                         <button

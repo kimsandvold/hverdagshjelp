@@ -3,6 +3,7 @@ import useAuthStore from '../../stores/useAuthStore';
 import useHelperStore from '../../stores/useHelperStore';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
+import SEO from '../../components/SEO';
 import subscriptions from '../../data/subscriptions.json';
 import { supabase } from '../../lib/supabase';
 
@@ -42,8 +43,8 @@ export default function Subscription() {
     }
   }, [profile?.id, getHelperById]);
 
-  // 5% discount per referral, max 40%
-  const discountPercent = Math.min(referralCount * 5, 40);
+  // 5% discount per referral, max 70%
+  const discountPercent = Math.min(referralCount * 5, 70);
 
   const getDiscountedPrice = (price) => {
     if (price === 0) return 0;
@@ -123,16 +124,26 @@ export default function Subscription() {
 
   return (
     <div className="py-8">
+      <SEO title="Abonnement" description="Administrer ditt abonnement." noindex />
       <h1 className="mb-2 text-2xl font-bold text-gray-900">Abonnement</h1>
       <p className="mb-8 text-gray-500">
         {'Velg planen som passer best for deg.'}
       </p>
 
-      {/* Free premium period notice */}
-      {!paidPlansAvailable && (
+      {/* Ambassador notice */}
+      {helper.ambassador && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-medium text-amber-800">
+            Du er <strong>Ambassadør</strong> og har permanent tilgang til alle Proff-fordeler.
+          </p>
+        </div>
+      )}
+
+      {/* Free Basis period notice */}
+      {!paidPlansAvailable && !helper.ambassador && (
         <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
           <p className="text-sm font-medium text-green-800">
-            Du har <strong>Premium gratis</strong> frem til <strong>1. juni 2026</strong>.
+            Du har <strong>Basis gratis</strong> frem til <strong>1. juni 2026</strong>.
             Etter dette blir du automatisk satt over på gratisplanen, med mulighet til å oppgradere.
           </p>
         </div>
@@ -145,7 +156,7 @@ export default function Subscription() {
             Du har {discountPercent}% rabatt ({referralCount} {referralCount === 1 ? 'vervning' : 'vervninger'})
           </p>
           <p className="mt-1 text-xs text-green-600">
-            5% rabatt per vervning, opptil 40% maks.
+            5% rabatt per vervning, opptil 70% maks.
           </p>
         </div>
       )}
@@ -160,7 +171,11 @@ export default function Subscription() {
       {/* Pricing cards */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {subscriptions.map((sub) => {
-          const isCurrent = !paidPlansAvailable ? sub.id === 'premium' : helper.tier === sub.id;
+          const isCurrent = helper.ambassador
+            ? sub.id === 'premium'
+            : !paidPlansAvailable
+              ? sub.id === 'basic'
+              : helper.tier === sub.id;
           const discountedPrice = getDiscountedPrice(sub.price);
           const hasDiscount = discountPercent > 0 && sub.price > 0;
           return (
@@ -241,14 +256,23 @@ export default function Subscription() {
 
               {/* Select button */}
               <div className="mt-6">
-                {!paidPlansAvailable ? (
+                {helper.ambassador ? (
                   <Button
                     variant={sub.id === 'premium' ? 'secondary' : 'outline'}
                     size="md"
                     className="w-full"
                     disabled
                   >
-                    {sub.id === 'premium' ? 'Aktiv til 1. juni' : 'Tilgjengelig fra 1. juni'}
+                    {sub.id === 'premium' ? 'Ambassadør' : '—'}
+                  </Button>
+                ) : !paidPlansAvailable ? (
+                  <Button
+                    variant={sub.id === 'basic' ? 'secondary' : 'outline'}
+                    size="md"
+                    className="w-full"
+                    disabled
+                  >
+                    {sub.id === 'basic' ? 'Aktiv til 1. juni' : 'Tilgjengelig fra 1. juni'}
                   </Button>
                 ) : (
                   <Button

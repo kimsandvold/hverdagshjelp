@@ -5,7 +5,7 @@ import StatsCard from '../../components/admin/StatsCard';
 const tierLabels = {
   free: 'Gratis',
   basic: 'Basis',
-  premium: 'Premium',
+  premium: 'Proff',
 };
 
 export default function AdminDashboard() {

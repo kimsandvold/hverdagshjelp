@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import useBookingStore from '../../stores/useBookingStore';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
+import SEO from '../../components/SEO';
 
 const statusLabels = {
   pending: 'Venter',
@@ -60,6 +61,7 @@ export default function IncomingBookings() {
 
   return (
     <div className="py-8">
+      <SEO title="Forespørsler" description="Innkommende forespørsler." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Forespørsler</h1>
 
       {bookings.length === 0 ? (

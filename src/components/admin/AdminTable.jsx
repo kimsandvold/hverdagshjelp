@@ -33,7 +33,7 @@ export default function AdminTable({ columns = [], data = [], actions = [] }) {
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className="whitespace-nowrap px-5 py-3 text-gray-700"
+                  className={`px-5 py-3 text-gray-700 ${col.render ? '' : 'whitespace-nowrap'}`}
                 >
                   {col.render ? col.render(row[col.key], row) : row[col.key]}
                 </td>

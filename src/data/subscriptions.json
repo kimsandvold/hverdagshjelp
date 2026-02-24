@@ -4,23 +4,43 @@
     "name": "Gratis",
     "price": 0,
     "period": "alltid",
-    "features": ["Synlig for kunder i ditt område", "Vis i søkeresultater", "2 tjenestekategorier"],
+    "features": [
+      "Synlig i søkeresultater",
+      "Maks 2 tjenestekategorier",
+      "Grunnleggende profil",
+      "Motta forespørsler via plattformen"
+    ],
     "highlighted": false
   },
   {
     "id": "basic",
     "name": "Basis",
-    "price": 299,
+    "price": 199,
     "period": "mnd",
-    "features": ["Alt i Gratis", "Prioritert i søk", "5 tjenestekategorier", "Verifisert-merke", "Se hvem som har sett profilen din"],
+    "features": [
+      "Alt i Gratis",
+      "Opptil 5 tjenestekategorier",
+      "Verifisert-merke",
+      "Prioritert plassering i søk",
+      "Profilstatistikk (visninger, klikk)",
+      "Lenke til egen nettside/SoMe"
+    ],
     "highlighted": true
   },
   {
     "id": "premium",
-    "name": "Premium",
-    "price": 499,
+    "name": "Proff",
+    "price": 399,
     "period": "mnd",
-    "features": ["Alt i Basis", "Vis øverst i søkeresultater", "Ubegrenset tjenestekategorier", "Premium-merke", "Fremhevet profil", "Rabatt ved verving"],
+    "features": [
+      "Alt i Basis",
+      "Ubegrenset tjenestekategorier",
+      "Fremhevet profil",
+      "Vis øverst i søkeresultater",
+      "Proff-merke",
+      "Bildegalleri (vis tidligere arbeid)",
+      "Rabatt ved verving (5 % per verving, maks 70 %)"
+    ],
     "highlighted": false
   }
 ]

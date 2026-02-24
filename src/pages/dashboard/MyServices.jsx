@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import useHelperStore from '../../stores/useHelperStore';
+import useAdminStore from '../../stores/useAdminStore';
 import Modal from '../../components/ui/Modal';
-import { supabase } from '../../lib/supabase';
+import SEO from '../../components/SEO';
 
 export default function MyServices() {
   const profile = useAuthStore((state) => state.profile);
   const getHelperById = useHelperStore((state) => state.getHelperById);
   const updateHelper = useHelperStore((state) => state.updateHelper);
+  const categories = useAdminStore((state) => state.categories);
+  const fetchCategories = useAdminStore((state) => state.fetchCategories);
 
-  const [categories, setCategories] = useState([]);
   const [helper, setHelper] = useState(null);
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState([]);
@@ -20,12 +22,8 @@ export default function MyServices() {
   const [editingSlug, setEditingSlug] = useState(null);
 
   useEffect(() => {
-    supabase
-      .from('categories')
-      .select('*')
-      .order('sort_order')
-      .then(({ data }) => setCategories(data || []));
-  }, []);
+    fetchCategories();
+  }, [fetchCategories]);
 
   useEffect(() => {
     if (profile?.id) {
@@ -57,9 +55,14 @@ export default function MyServices() {
     setSaving(false);
   };
 
-  const paidPlansAvailable = new Date() >= new Date('2026-06-01');
+  const isFreePeriod = new Date() < new Date('2026-06-01');
   const categoryLimits = { free: 2, basic: 5, premium: Infinity };
-  const maxCategories = !paidPlansAvailable ? Infinity : (categoryLimits[helper?.tier] ?? 2);
+  const effectiveTier = helper?.ambassador
+    ? 'premium'
+    : isFreePeriod && (helper?.tier === 'free')
+      ? 'basic'
+      : (helper?.tier || 'free');
+  const maxCategories = categoryLimits[effectiveTier] ?? 2;
 
   const handleToggleService = (categorySlug) => {
     setServices((prev) => {
@@ -146,6 +149,7 @@ export default function MyServices() {
 
   return (
     <div className="w-full py-8">
+      <SEO title="Mine tjenester" description="Administrer tjenestene dine." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Mine tjenester</h1>
 
       <div className="space-y-6">
@@ -324,6 +328,28 @@ export default function MyServices() {
                     ))}
                   </div>
                 )}
+                {/* Suggested tags */}
+                {editingCat?.suggested_tags?.length > 0 && (
+                  <div className="mb-2">
+                    <span className="mb-1 block text-xs text-gray-400">Forslag:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {editingCat.suggested_tags
+                        .filter((st) => !(editingService.tags || []).includes(st))
+                        .map((st) => (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() =>
+                              handleServiceField(editingSlug, 'tags', [...(editingService.tags || []), st])
+                            }
+                            className="rounded-full border border-dashed border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-500 transition-colors hover:border-primary-400 hover:bg-primary-50 hover:text-primary-600 cursor-pointer"
+                          >
+                            + {st}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -332,7 +358,7 @@ export default function MyServices() {
                       setTagInputs((prev) => ({ ...prev, [editingSlug]: e.target.value }))
                     }
                     onKeyDown={(e) => handleTagKeyDown(e, editingSlug)}
-                    placeholder="f.eks. vinduspuss, dyprens..."
+                    placeholder="Eller skriv dine egne..."
                     className="flex-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                   />
                   <button

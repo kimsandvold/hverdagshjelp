@@ -5,7 +5,7 @@ const badgeConfig = {
   },
   premium: {
     className: 'bg-accent-100 text-accent-800',
-    label: '\u2605 Premium',
+    label: '\u2605 Proff',
   },
   basic: {
     className: 'bg-blue-100 text-blue-800',

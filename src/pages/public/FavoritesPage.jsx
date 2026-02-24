@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import useFavoritesStore from '../../stores/useFavoritesStore';
 import HelperCard from '../../components/HelperCard';
+import SEO from '../../components/SEO';
 
 export default function FavoritesPage() {
   const getFavoriteHelpers = useFavoritesStore((state) => state.getFavoriteHelpers);
@@ -24,6 +25,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="py-8">
+      <SEO title="Lagrede hjelpere" description="Dine lagrede hjelpere." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Lagrede hjelpere</h1>
 
       {helpers.length > 0 ? (

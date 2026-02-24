@@ -1,14 +1,19 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import { PLATFORM_FEE_PERCENT } from '../lib/config'
+import { isStale, STALE_60S } from '../lib/stale'
 
-const useBookingStore = create((set) => ({
+const useBookingStore = create((set, get) => ({
   bookings: [],
   loading: false,
   updatedCount: 0,
   incomingPendingCount: 0,
+  _lastFetchedIncoming: null,
+  _lastFetchedUpdated: null,
 
   fetchIncomingPendingCount: async () => {
+    if (!isStale(get()._lastFetchedIncoming, STALE_60S)) return
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -18,10 +23,12 @@ const useBookingStore = create((set) => ({
       .eq('helper_id', user.id)
       .eq('status', 'pending')
 
-    set({ incomingPendingCount: count || 0 })
+    set({ incomingPendingCount: count || 0, _lastFetchedIncoming: Date.now() })
   },
 
   fetchUpdatedCount: async () => {
+    if (!isStale(get()._lastFetchedUpdated, STALE_60S)) return
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -32,7 +39,7 @@ const useBookingStore = create((set) => ({
       .in('status', ['accepted', 'declined'])
       .eq('seen_by_client', false)
 
-    set({ updatedCount: count || 0 })
+    set({ updatedCount: count || 0, _lastFetchedUpdated: Date.now() })
   },
 
   createBooking: async (helperId, categorySlug, description, preferredDate) => {
@@ -145,7 +152,7 @@ const useBookingStore = create((set) => ({
       .in('status', ['accepted', 'declined'])
       .eq('seen_by_client', false)
 
-    set({ updatedCount: 0 })
+    set({ updatedCount: 0, _lastFetchedUpdated: null })
   },
 
   updateBookingStatus: async (id, status, agreedPrice) => {
@@ -163,6 +170,8 @@ const useBookingStore = create((set) => ({
       bookings: state.bookings.map(b =>
         b.id === id ? { ...b, ...updates } : b
       ),
+      _lastFetchedIncoming: null,
+      _lastFetchedUpdated: null,
     }))
     return { success: true }
   },

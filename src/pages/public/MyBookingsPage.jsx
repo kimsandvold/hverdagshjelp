@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useBookingStore from '../../stores/useBookingStore';
 import useMessagesStore from '../../stores/useMessagesStore';
+import SEO from '../../components/SEO';
 
 const statusLabels = {
   pending: 'Venter på svar',
@@ -46,6 +47,7 @@ export default function MyBookingsPage() {
 
   return (
     <div className="py-8">
+      <SEO title="Mine forespørsler" description="Dine forespørsler." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Mine forespørsler</h1>
 
       {bookings.length === 0 ? (

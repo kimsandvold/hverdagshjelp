@@ -101,7 +101,7 @@ export default function OnboardingWizard() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <SEO title="Fullfør profilen din" description="Sett opp hjelperprofilen din steg for steg." />
+      <SEO title="Fullfør profilen din" description="Sett opp hjelperprofilen din steg for steg." noindex />
 
       <h1 className="mb-2 text-2xl font-bold text-gray-900">Fullfør profilen din</h1>
       <p className="mb-8 text-sm text-gray-500">Fyll ut informasjonen nedenfor for å bli synlig for kunder.</p>

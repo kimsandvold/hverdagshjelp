@@ -34,6 +34,7 @@ export default function Registrer() {
     email: '',
     password: '',
   });
+  const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { ref: referralCode } = useParams();
@@ -109,17 +110,34 @@ export default function Registrer() {
     <div className="mx-auto max-w-md px-4 py-12">
       <SEO
         title="Registrer deg som hjelper"
-        description="Opprett en hjelperprofil og kom i gang."
+        description="Opprett en gratis hjelperprofil på Din Helt — sett dine priser, bli synlig i ditt nærområde og tjen penger."
         url="https://dinhelt.no/registrer"
       />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Opprett hjelper-konto</h1>
 
       <div className="space-y-5 rounded-xl bg-white p-6 shadow-sm sm:p-8">
+        {/* Consent */}
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-left transition-colors hover:bg-gray-100">
+          <input
+            type="checkbox"
+            checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-primary-500"
+          />
+          <span className="text-sm leading-relaxed text-gray-600">
+            Jeg forplikter meg til å opptre ærlig og profesjonelt som hjelper på Din Helt, og har lest{' '}
+            <a href="/bli-hjelper#slik-fungerer-det" className="font-medium text-primary-500 underline hover:text-primary-600">
+              forventningene
+            </a>
+            .
+          </span>
+        </label>
+
         {/* Google button */}
         <button
           type="button"
           onClick={handleGoogle}
-          disabled={submitting}
+          disabled={submitting || !accepted}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
         >
           <GoogleIcon />
@@ -208,7 +226,7 @@ export default function Registrer() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button type="submit" variant="primary" size="lg" className="w-full" disabled={submitting}>
+          <Button type="submit" variant="primary" size="lg" className="w-full" disabled={submitting || !accepted}>
             {submitting ? 'Oppretter konto...' : 'Opprett konto'}
           </Button>
 

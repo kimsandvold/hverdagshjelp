@@ -61,8 +61,8 @@ const shuffled = [...ctaVariants].sort(() => Math.random() - 0.5);
 
 const highlights = [
   { title: 'Hjem og hage', items: ['Rengjøring', 'Hage og utearbeid', 'Småjobber og vedlikehold', 'Rydding og organisering'] },
-  { title: 'Praktisk hjelp', items: ['Handlehjelp og ærend', 'Flytting og bærehjelp', 'Kjøring og følge', 'Matlaging og måltider'] },
-  { title: 'Omsorg og selskap', items: ['Besøksvenn og selskap', 'Turfølge og aktiviteter', 'Barnepass', 'Dyrepass'] },
+  { title: 'Praktisk hjelp', items: ['Handlehjelp og ærend', 'Flytting og bærehjelp', 'Kjøring og følge', 'Fotografering'] },
+  { title: 'Omsorg og selskap', items: ['Besøksvenn og selskap', 'Turfølge og aktiviteter', 'Matlaging og måltider', 'Dyrepass'] },
   { title: 'Læring og utvikling', items: ['Digital hjelp', 'Leksehjelp og språkhjelp', 'Kurs og opplæring', 'Motivator'] },
 ];
 
@@ -72,6 +72,7 @@ export default function Forside() {
     '@type': 'WebSite',
     name: 'Din Helt',
     url: 'https://dinhelt.no',
+    description: 'Finn pålitelig hjelp til hverdagen — rengjøring, hagearbeid, småjobber, flyttehjelp, barnepass, dyrepass og mer nær deg.',
     potentialAction: {
       '@type': 'SearchAction',
       target: 'https://dinhelt.no/search?q={search_term_string}',
@@ -83,7 +84,7 @@ export default function Forside() {
     <div>
       <SEO
         title="Finn hjelp til hverdagen"
-        description="Rengjøring, hagearbeid, småjobber, besøksvenn og mer — finn pålitelig hjelp nær deg."
+        description="Finn pålitelig hjelp til hverdagen — rengjøring, hagearbeid, småjobber, flyttehjelp, barnepass, dyrepass og mer nær deg."
         url="https://dinhelt.no/"
         jsonLd={jsonLd}
       />

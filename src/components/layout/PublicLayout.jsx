@@ -89,9 +89,11 @@ export default function PublicLayout() {
                 <NavLink to="/search" className={navLinkClass}>
                   <span className="px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors inline-block">Finn hjelper</span>
                 </NavLink>
-                <NavLink to="/bli-hjelper" className={navLinkClass}>
-                  <span className="px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors inline-block">Bli hjelper</span>
-                </NavLink>
+                {role !== 'helper' && role !== 'admin' && (
+                  <NavLink to="/bli-hjelper" className={navLinkClass}>
+                    <span className="px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors inline-block">Bli hjelper</span>
+                  </NavLink>
+                )}
               </div>
             </div>
 
@@ -99,18 +101,20 @@ export default function PublicLayout() {
             <div className="hidden md:flex items-center gap-1 ml-auto">
               {isAuthenticated && (
                 <>
-                  {/* Saved helpers icon */}
-                  <NavLink
-                    to="/favoritter"
-                    className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
-                    title="Lagrede hjelpere"
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                    </svg>
-                  </NavLink>
+                  {/* Saved helpers — visitors only */}
+                  {role === 'user' && (
+                    <NavLink
+                      to="/favoritter"
+                      className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                      title="Lagrede hjelpere"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                      </svg>
+                    </NavLink>
+                  )}
 
-                  {/* Messages icon with badge */}
+                  {/* Messages — all roles */}
                   <NavLink
                     to="/meldinger"
                     className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
@@ -126,21 +130,41 @@ export default function PublicLayout() {
                     )}
                   </NavLink>
 
-                  {/* Requests icon */}
-                  <NavLink
-                    to="/mine-foresporsler"
-                    className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
-                    title="Forespørsler"
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                    </svg>
-                    {bookingUpdatedCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
-                        {bookingUpdatedCount > 9 ? '9+' : bookingUpdatedCount}
-                      </span>
-                    )}
-                  </NavLink>
+                  {/* My requests — visitors only */}
+                  {role === 'user' && (
+                    <NavLink
+                      to="/mine-foresporsler"
+                      className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                      title="Mine forespørsler"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                      </svg>
+                      {bookingUpdatedCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                          {bookingUpdatedCount > 9 ? '9+' : bookingUpdatedCount}
+                        </span>
+                      )}
+                    </NavLink>
+                  )}
+
+                  {/* Incoming bookings — helpers only */}
+                  {role === 'helper' && (
+                    <NavLink
+                      to="/dashboard/bookings"
+                      className={({ isActive }) => `relative p-2 rounded-lg transition-colors ${isActive ? 'text-primary-500 bg-primary-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                      title="Innkommende forespørsler"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15a2.25 2.25 0 0 1 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                      </svg>
+                      {incomingPendingCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                          {incomingPendingCount > 9 ? '9+' : incomingPendingCount}
+                        </span>
+                      )}
+                    </NavLink>
+                  )}
 
                   <div className="mx-2 h-6 w-px bg-gray-200" />
                 </>
@@ -327,18 +351,22 @@ export default function PublicLayout() {
             <NavLink to="/search" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
               Finn hjelper
             </NavLink>
-            <NavLink to="/bli-hjelper" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
-              Bli hjelper
-            </NavLink>
+            {role !== 'helper' && role !== 'admin' && (
+              <NavLink to="/bli-hjelper" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
+                Bli hjelper
+              </NavLink>
+            )}
 
             {isAuthenticated && (
               <>
                 <NavLink to="/profil" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                   Profil
                 </NavLink>
-                <NavLink to="/favoritter" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
-                  Lagrede hjelpere
-                </NavLink>
+                {role === 'user' && (
+                  <NavLink to="/favoritter" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    Lagrede hjelpere
+                  </NavLink>
+                )}
                 <NavLink to="/meldinger" className={({ isActive }) => `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                   Meldinger
                   {unreadCount > 0 && (
@@ -347,14 +375,16 @@ export default function PublicLayout() {
                     </span>
                   )}
                 </NavLink>
-                <NavLink to="/mine-foresporsler" className={({ isActive }) => `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
-                  Mine forespørsler
-                  {bookingUpdatedCount > 0 && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
-                      {bookingUpdatedCount > 9 ? '9+' : bookingUpdatedCount}
-                    </span>
-                  )}
-                </NavLink>
+                {role === 'user' && (
+                  <NavLink to="/mine-foresporsler" className={({ isActive }) => `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    Mine forespørsler
+                    {bookingUpdatedCount > 0 && (
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold text-white">
+                        {bookingUpdatedCount > 9 ? '9+' : bookingUpdatedCount}
+                      </span>
+                    )}
+                  </NavLink>
+                )}
                 {role === 'helper' && (
                   <>
                     <div className="pt-2 mt-2 border-t border-gray-200">
@@ -446,6 +476,16 @@ export default function PublicLayout() {
               <li>
                 <Link to="/login" className="hover:text-white transition-colors">
                   Logg inn
+                </Link>
+              </li>
+              <li>
+                <Link to="/om-oss" className="hover:text-white transition-colors">
+                  Om Din Helt
+                </Link>
+              </li>
+              <li>
+                <Link to="/kontakt" className="hover:text-white transition-colors">
+                  Kontakt oss
                 </Link>
               </li>
             </ul>

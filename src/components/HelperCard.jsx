@@ -49,8 +49,8 @@ export default function HelperCard({ helper }) {
     <Link
       to={`/helper/${helper.id}`}
       className={`block rounded-xl p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md overflow-hidden ${
-        helper.tier === 'premium'
-          ? 'border-2 border-accent-400 bg-accent-50/30'
+        helper.ambassador || helper.tier === 'premium'
+          ? 'border-l-3 border-l-accent-400 bg-accent-50/30'
           : 'bg-white'
       }`}
     >
@@ -102,8 +102,8 @@ export default function HelperCard({ helper }) {
 
             {/* Badges + Bookmark */}
             <div className="flex flex-shrink-0 items-center gap-1 sm:gap-2">
-              {helper.tier === 'premium' && <Badge type="premium" />}
-              {helper.tier === 'basic' && <Badge type="basic" />}
+              {(helper.ambassador || helper.tier === 'premium') && <Badge type="premium" />}
+              {!helper.ambassador && helper.tier === 'basic' && <Badge type="basic" />}
               {helper.verified && <span className="hidden sm:inline"><Badge type="verified" /></span>}
               {isAuthenticated && (
                 <button

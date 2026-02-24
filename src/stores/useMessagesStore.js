@@ -1,11 +1,14 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { isStale, STALE_60S } from '../lib/stale'
 
 const useMessagesStore = create((set, get) => ({
   conversations: [],
   activeMessages: [],
   loading: false,
   unreadCount: 0,
+  _lastFetchedConversations: null,
+  _lastFetchedUnread: null,
 
   fetchConversations: async () => {
     set({ loading: true })
@@ -14,17 +17,23 @@ const useMessagesStore = create((set, get) => ({
 
     const { data } = await supabase.rpc('get_conversations', { p_user_id: user.id })
 
+    const convos = (data || []).map(c => ({
+      id: c.id,
+      otherUserId: c.other_user_id,
+      otherUserName: c.other_user_name,
+      otherUserAvatar: c.other_user_avatar,
+      lastMessage: c.last_message,
+      lastMessageAt: c.last_message_at,
+      unreadCount: c.unread_count,
+    }))
+    const total = convos.reduce((sum, c) => sum + (c.unreadCount || 0), 0)
+
     set({
-      conversations: (data || []).map(c => ({
-        id: c.id,
-        otherUserId: c.other_user_id,
-        otherUserName: c.other_user_name,
-        otherUserAvatar: c.other_user_avatar,
-        lastMessage: c.last_message,
-        lastMessageAt: c.last_message_at,
-        unreadCount: c.unread_count,
-      })),
+      conversations: convos,
+      unreadCount: total,
       loading: false,
+      _lastFetchedConversations: Date.now(),
+      _lastFetchedUnread: Date.now(),
     })
   },
 
@@ -119,16 +128,20 @@ const useMessagesStore = create((set, get) => ({
       .neq('sender_id', user.id)
       .is('read_at', null)
 
-    set((state) => ({
-      activeMessages: state.activeMessages.map(m =>
-        m.conversationId === conversationId && m.senderId !== user.id && !m.readAt
-          ? { ...m, readAt: new Date().toISOString() }
-          : m
-      ),
-      conversations: state.conversations.map(c =>
+    set((state) => {
+      const updatedConversations = state.conversations.map(c =>
         c.id === conversationId ? { ...c, unreadCount: 0 } : c
-      ),
-    }))
+      )
+      return {
+        activeMessages: state.activeMessages.map(m =>
+          m.conversationId === conversationId && m.senderId !== user.id && !m.readAt
+            ? { ...m, readAt: new Date().toISOString() }
+            : m
+        ),
+        conversations: updatedConversations,
+        unreadCount: updatedConversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0),
+      }
+    })
   },
 
   deleteConversation: async (conversationId) => {
@@ -143,10 +156,14 @@ const useMessagesStore = create((set, get) => ({
       .delete()
       .eq('id', conversationId)
 
-    set((state) => ({
-      conversations: state.conversations.filter(c => c.id !== conversationId),
-      activeMessages: [],
-    }))
+    set((state) => {
+      const remaining = state.conversations.filter(c => c.id !== conversationId)
+      return {
+        conversations: remaining,
+        activeMessages: [],
+        unreadCount: remaining.reduce((sum, c) => sum + (c.unreadCount || 0), 0),
+      }
+    })
   },
 
   searchProfiles: async (query) => {
@@ -165,12 +182,22 @@ const useMessagesStore = create((set, get) => ({
   },
 
   fetchUnreadCount: async () => {
+    if (!isStale(get()._lastFetchedUnread, STALE_60S)) return
+
+    // Derive from conversations if already loaded
+    const { conversations, _lastFetchedConversations } = get()
+    if (_lastFetchedConversations && !isStale(_lastFetchedConversations, STALE_60S)) {
+      const total = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0)
+      set({ unreadCount: total, _lastFetchedUnread: Date.now() })
+      return
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
     const { data } = await supabase.rpc('get_conversations', { p_user_id: user.id })
     const total = (data || []).reduce((sum, c) => sum + (c.unread_count || 0), 0)
-    set({ unreadCount: total })
+    set({ unreadCount: total, _lastFetchedUnread: Date.now() })
   },
 }))
 

@@ -34,6 +34,7 @@ create table helpers (
   verified boolean not null default false,
   active boolean not null default true,
   locked boolean not null default false,
+  ambassador boolean not null default false,
   onboarding_completed boolean not null default false,
   languages jsonb not null default '[]',
   birth_date date,
@@ -50,7 +51,8 @@ create table categories (
   icon text,
   description text,
   color text,
-  sort_order int not null default 0
+  sort_order int not null default 0,
+  suggested_tags text[] not null default '{}'
 );
 
 -- Helper services: normalized services per helper
@@ -480,7 +482,7 @@ begin
       )
     )
   order by
-    case h.tier when 'premium' then 0 when 'basic' then 1 else 2 end,
+    case when h.ambassador then 0 when h.tier = 'premium' then 0 when h.tier = 'basic' then 1 else 2 end,
     case
       when user_lat is not null and user_lng is not null and h.location is not null
       then st_distance(
@@ -551,23 +553,39 @@ $$;
 -- 10. Seed categories
 -- ============================================================
 
-insert into categories (slug, name, icon, description, color, sort_order) values
-  ('rengjoring', 'Rengjøring', null, 'Rengjøring av hjem, kontor og fellesareal', null, 1),
-  ('hage-og-utearbeid', 'Hage og utearbeid', null, 'Hagearbeid, gressklipping, snørydding og utevedlikehold', null, 2),
-  ('smajobber', 'Småjobber og vedlikehold', null, 'Montering, reparasjoner og enkel vedlikehold i hjemmet', null, 3),
-  ('handlehjelp', 'Handlehjelp og ærend', null, 'Hjelp med dagligvarehandel, apotektur og andre ærend', null, 4),
-  ('flyttehjelp', 'Flytting og bærehjelp', null, 'Flytting, bærehjelp og transport av tunge ting', null, 5),
-  ('kjoring-og-folge', 'Kjøring og følge', null, 'Kjøring til lege, butikk eller avtaler — med selskap underveis', null, 6),
-  ('barnepass', 'Barnepass', null, 'Barnevakt, henting fra skole og aktiviteter', null, 7),
-  ('dyrepass', 'Dyrepass', null, 'Lufting, pass og stell av kjæledyr', null, 8),
-  ('rydding', 'Rydding og organisering', null, 'Rydding, sortering og organisering av hjem og garasje', null, 9),
-  ('besoksvenn', 'Besøksvenn og selskap', null, 'Noen å prate med, drikke kaffe med eller bare ha selskap av', null, 10),
-  ('turfolge', 'Turfølge og aktiviteter', null, 'Følge på tur, gåtur eller felles aktivitet utendørs', null, 11),
-  ('matlaging', 'Matlaging og måltider', null, 'Hjelp med matlaging, middagsplanlegging eller et måltid sammen', null, 12),
-  ('digital-hjelp', 'Digital hjelp', null, 'Hjelp med mobil, nettbrett, PC, apper og digitale tjenester', null, 13),
-  ('leksehjelp', 'Leksehjelp og språkhjelp', null, 'Leksehjelp for barn og unge, eller språktrening for voksne', null, 14),
-  ('kurs-opplaring', 'Kurs og opplæring', null, 'Personlig undervisning, kurs og opplæring i praktiske ferdigheter', null, 15),
-  ('motivator', 'Motivator', null, 'Noen som heier på deg — treningspartner, vanebygger eller daglig dytt', null, 16)
+insert into categories (slug, name, icon, description, color, sort_order, suggested_tags) values
+  ('rengjoring', 'Rengjøring', null, 'Rengjøring av hjem, kontor og fellesareal', null, 1,
+    '{"vinduspuss","dyprens","stryking","støvsuging","baderom","kjøkken","kontor","trappevask","gulvvask"}'),
+  ('hage-og-utearbeid', 'Hage og utearbeid', null, 'Hagearbeid, gressklipping, snørydding og utevedlikehold', null, 2,
+    '{"gressklipping","hekklipping","ugress","snørydding","planting","løvraking","vedlikehold","terrasse"}'),
+  ('smajobber', 'Småjobber og vedlikehold', null, 'Montering, reparasjoner og enkel vedlikehold i hjemmet', null, 3,
+    '{"montering","reparasjon","maling","ikea","hyller","lamper","dørfikser","tetting"}'),
+  ('handlehjelp', 'Handlehjelp og ærend', null, 'Hjelp med dagligvarehandel, apotektur og andre ærend', null, 4,
+    '{"dagligvarer","apotek","post","matkjøring","ærend","levering"}'),
+  ('flyttehjelp', 'Flytting og bærehjelp', null, 'Flytting, bærehjelp og transport av tunge ting', null, 5,
+    '{"bæring","pakking","transport","møbler","tungt","varebil","nedrigging"}'),
+  ('kjoring-og-folge', 'Kjøring og følge', null, 'Kjøring til lege, butikk eller avtaler — med selskap underveis', null, 6,
+    '{"legebesøk","butikk","flyplass","sykehus","avtaler","følge"}'),
+  ('fotografering', 'Fotografering', null, 'Portrettfoto, produktfoto, eventfoto og bilderedigering', null, 7,
+    '{"portrett","produktfoto","eventfoto","bryllup","redigering","drone","video"}'),
+  ('dyrepass', 'Dyrepass', null, 'Lufting, pass og stell av kjæledyr', null, 8,
+    '{"hund","katt","lufting","overnatting","fôring","fugl","smårdyr"}'),
+  ('rydding', 'Rydding og organisering', null, 'Rydding, sortering og organisering av hjem og garasje', null, 9,
+    '{"garasje","bod","loft","sortering","kasting","organisering","dødsbo"}'),
+  ('besoksvenn', 'Besøksvenn og selskap', null, 'Noen å prate med, drikke kaffe med eller bare ha selskap av', null, 10,
+    '{"samtale","kaffe","eldre","selskap","hygge","høytlesing"}'),
+  ('turfolge', 'Turfølge og aktiviteter', null, 'Følge på tur, gåtur eller felles aktivitet utendørs', null, 11,
+    '{"gåtur","fjelltur","sykling","trening","svømming","ski","aktivitet"}'),
+  ('matlaging', 'Matlaging og måltider', null, 'Hjelp med matlaging, middagsplanlegging eller et måltid sammen', null, 12,
+    '{"middag","baking","mealprep","ernæring","vegetar","allergivennlig","selskap"}'),
+  ('digital-hjelp', 'Digital hjelp', null, 'Hjelp med mobil, nettbrett, PC, apper og digitale tjenester', null, 13,
+    '{"mobil","pc","nettbrett","apper","nettbank","epost","skriver","wifi"}'),
+  ('leksehjelp', 'Leksehjelp og språkhjelp', null, 'Leksehjelp for barn og unge, eller språktrening for voksne', null, 14,
+    '{"matte","norsk","engelsk","naturfag","språktrening","lesing","eksamen"}'),
+  ('kurs-opplaring', 'Kurs og opplæring', null, 'Personlig undervisning, kurs og opplæring i praktiske ferdigheter', null, 15,
+    '{"sying","maling","matlaging","håndverk","musikk","foto","data"}'),
+  ('motivator', 'Motivator', null, 'Noen som heier på deg — treningspartner, vanebygger eller daglig dytt', null, 16,
+    '{"trening","vaner","kosthold","morgenrutine","løping","styrke","mental helse"}')
 on conflict (slug) do nothing;
 
 -- ============================================================
@@ -829,9 +847,14 @@ returns trigger as $$
 declare
   current_count int;
   helper_tier text;
+  is_ambassador boolean;
 begin
-  -- Free premium period: skip limits before 2026-06-01
-  if now() < '2026-06-01'::timestamptz then
+  select tier, ambassador into helper_tier, is_ambassador
+  from helpers
+  where id = new.helper_id;
+
+  -- Ambassadors have unlimited categories (always)
+  if is_ambassador then
     return new;
   end if;
 
@@ -839,10 +862,15 @@ begin
   from helper_services
   where helper_id = new.helper_id;
 
-  select tier into helper_tier
-  from helpers
-  where id = new.helper_id;
+  -- Free Basis period: apply Basis limits (max 5) before 2026-06-01
+  if now() < '2026-06-01'::timestamptz then
+    if current_count >= 5 then
+      raise exception 'I lanseringsperioden kan du ha maks 5 tjenester. Etter 1. juni kan du oppgradere for flere.';
+    end if;
+    return new;
+  end if;
 
+  -- Normal tier limits after free period
   if helper_tier = 'free' and current_count >= 2 then
     raise exception 'Gratis-brukere kan maks ha 2 tjenester. Oppgrader for å legge til flere.';
   end if;
@@ -923,7 +951,8 @@ returns table (
   created_at timestamptz,
   services jsonb,
   distance_km double precision,
-  avg_rating numeric
+  avg_rating numeric,
+  ambassador boolean
 )
 language plpgsql stable
 as $$
@@ -977,7 +1006,8 @@ begin
       ) / 1000.0
       else null
     end as distance_km,
-    (select round(avg(r.rating)::numeric, 1) from reviews r where r.helper_id = h.id) as avg_rating
+    (select round(avg(r.rating)::numeric, 1) from reviews r where r.helper_id = h.id) as avg_rating,
+    h.ambassador
   from helpers h
   join profiles p on p.id = h.id
   where h.active = true
@@ -1023,7 +1053,7 @@ begin
       )
     )
   order by
-    case h.tier when 'premium' then 0 when 'basic' then 1 else 2 end,
+    case when h.ambassador then 0 when h.tier = 'premium' then 0 when h.tier = 'basic' then 1 else 2 end,
     case
       when user_lat is not null and user_lng is not null and h.location is not null
       then st_distance(

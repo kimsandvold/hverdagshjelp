@@ -176,12 +176,22 @@ const useHelperStore = create((set, get) => ({
     await get().fetchHelpers(true)
   },
 
+  _helperCache: new Map(),
+
   getHelperById: async (id) => {
-    // Check local cache first (search results use location_label, normalize to location)
-    const cached = get().helpers.find(h => h.id === id)
-    if (cached) return {
-      ...cached,
-      location: cached.location || cached.location_label || '',
+    // Check dedicated cache first
+    const fromCache = get()._helperCache.get(id)
+    if (fromCache) return fromCache
+
+    // Check search results array (normalize location field)
+    const fromSearch = get().helpers.find(h => h.id === id)
+    if (fromSearch) {
+      const result = {
+        ...fromSearch,
+        location: fromSearch.location || fromSearch.location_label || '',
+      }
+      get()._helperCache.set(id, result)
+      return result
     }
 
     // Fetch from Supabase
@@ -209,7 +219,7 @@ const useHelperStore = create((set, get) => ({
       }
     }
 
-    return {
+    const result = {
       id: helper.id,
       name: helper.profiles.name,
       email: helper.profiles.show_email !== false ? helper.profiles.email : null,
@@ -227,6 +237,7 @@ const useHelperStore = create((set, get) => ({
       tier: helper.tier,
       verified: helper.verified,
       active: helper.active,
+      ambassador: helper.ambassador || false,
       referredBy: helper.referred_by,
       createdAt: helper.created_at,
       services: (services || []).map(s => ({
@@ -240,6 +251,9 @@ const useHelperStore = create((set, get) => ({
         tags: s.tags || [],
       })),
     }
+
+    get()._helperCache.set(id, result)
+    return result
   },
 
   updateHelper: async (id, data) => {
@@ -296,7 +310,8 @@ const useHelperStore = create((set, get) => ({
       }
     }
 
-    // Update local cache
+    // Update local cache + invalidate helper cache entry
+    get()._helperCache.delete(id)
     set((state) => ({
       helpers: state.helpers.map(h => h.id === id ? { ...h, ...data } : h),
     }))

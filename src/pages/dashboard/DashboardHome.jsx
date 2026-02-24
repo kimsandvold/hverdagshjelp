@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import useHelperStore from '../../stores/useHelperStore';
 import { supabase } from '../../lib/supabase';
+import SEO from '../../components/SEO';
 
 export default function DashboardHome() {
   const profile = useAuthStore((state) => state.profile);
@@ -27,6 +28,14 @@ export default function DashboardHome() {
         .then(({ count }) => setViewCount(count || 0));
     }
   }, [profile?.id, getHelperById]);
+
+  // Compute effective tier: ambassador → premium, before June 1 → basic, else stored tier
+  const isFreePeriod = new Date() < new Date('2026-06-01');
+  const effectiveTier = helper?.ambassador
+    ? 'premium'
+    : isFreePeriod
+      ? 'basic'
+      : helper?.tier || 'free';
 
   const referralUrl = helper ? `${window.location.origin}/registrer/${helper.id}` : '';
 
@@ -56,6 +65,7 @@ export default function DashboardHome() {
 
   return (
     <div className="py-8">
+      <SEO title="Dashboard" description="Din hjelper-dashboard." noindex />
       {/* Welcome message */}
       <h1 className="text-2xl font-bold text-gray-900">
         {'Velkommen tilbake, '}{helper.name}{'!'}
@@ -85,7 +95,14 @@ export default function DashboardHome() {
         <div className="rounded-xl bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-gray-500">Abonnement</p>
           <div className="mt-2">
-            <span className="text-sm font-medium text-gray-700 capitalize">{helper.tier === 'free' ? 'Gratis' : helper.tier === 'basic' ? 'Basis' : 'Premium'}</span>
+            <span className="text-sm font-medium text-gray-700 capitalize">
+              {effectiveTier === 'free' ? 'Gratis' : effectiveTier === 'basic' ? 'Basis' : 'Proff'}
+            </span>
+            {helper.ambassador && (
+              <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                Ambassadør
+              </span>
+            )}
           </div>
         </div>
 
@@ -98,7 +115,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Profile views */}
-        {helper.tier !== 'free' ? (
+        {effectiveTier !== 'free' ? (
           <div className="rounded-xl bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-gray-500">Profilvisninger</p>
             <p className="mt-2 text-lg font-semibold text-gray-900">{viewCount}</p>
@@ -120,11 +137,11 @@ export default function DashboardHome() {
       </div>
 
       {/* Referral — premium only */}
-      {helper.tier === 'premium' ? (
+      {effectiveTier === 'premium' ? (
         <div className="mt-8 rounded-xl border border-primary-100 bg-primary-50 p-5">
           <h2 className="text-base font-semibold text-primary-800">Verv en venn</h2>
           <p className="mt-1 text-sm text-primary-600">
-            Del lenken under med en venn. For hver hjelper du verver får du 5&nbsp;% rabatt på abonnementet. Du kan spare opptil 40&nbsp;%.
+            Del lenken under med en venn. For hver hjelper du verver får du 5&nbsp;% rabatt på abonnementet. Du kan spare opptil 70&nbsp;%.
           </p>
           <div className="mt-3 flex items-center gap-2">
             <input
@@ -146,13 +163,13 @@ export default function DashboardHome() {
         <div className="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-5">
           <h2 className="text-base font-semibold text-gray-400">Verv en venn</h2>
           <p className="mt-1 text-sm text-gray-400">
-            Oppgrader til Premium for å få tilgang til verveprogrammet og spar opptil 40&nbsp;% på abonnementet.
+            Oppgrader til Proff for å få tilgang til verveprogrammet og spar opptil 70&nbsp;% på abonnementet.
           </p>
           <Link
             to="/dashboard/subscription"
             className="mt-3 inline-block rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
           >
-            Oppgrader til Premium
+            Oppgrader til Proff
           </Link>
         </div>
       )}

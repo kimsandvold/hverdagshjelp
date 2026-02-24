@@ -36,13 +36,9 @@ function RecenterMap({ lat, lng, radiusKm }) {
   const map = useMap();
   useEffect(() => {
     if (lat == null || lng == null) return;
-    const latOffset = radiusKm / 111;
-    const lngOffset = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
-    const bounds = L.latLngBounds(
-      [lat - latOffset, lng - lngOffset],
-      [lat + latOffset, lng + lngOffset]
-    );
-    map.fitBounds(bounds, { padding: [15, 15], animate: true });
+    const center = L.latLng(lat, lng);
+    const bounds = center.toBounds(radiusKm * 1000 * 0.85 * 2);
+    map.fitBounds(bounds, { padding: [40, 40], animate: true, maxZoom: 18 });
   }, [lat, lng, radiusKm, map]);
   return null;
 }
@@ -87,7 +83,7 @@ export default function HelperFilters() {
 
   // Map state
   const [mapCenter, setMapCenter] = useState(null);
-  const [radiusKm, setRadiusKm] = useState(locationStore.radiusKm || 10);
+  const [radiusKm, setRadiusKm] = useState(locationStore.radiusKm || 20);
   const [mapLoading, setMapLoading] = useState(true);
 
   // Place search state
@@ -269,11 +265,11 @@ export default function HelperFilters() {
         </h3>
 
         {mapLoading ? (
-          <div className="flex h-44 items-center justify-center rounded-lg bg-gray-100">
+          <div className="flex aspect-square items-center justify-center rounded-lg bg-gray-100">
             <p className="text-xs text-gray-500">Henter posisjon...</p>
           </div>
         ) : mapCenter ? (
-          <div className="relative z-0 h-44 w-full overflow-hidden rounded-lg">
+          <div className="relative z-0 aspect-square w-full overflow-hidden rounded-lg">
             <MapContainer
               center={[mapCenter.lat, mapCenter.lng]}
               zoom={locationStore.isSet ? 11 : 5}
@@ -287,7 +283,7 @@ export default function HelperFilters() {
               <Circle
                 key={`${mapCenter.lat}-${mapCenter.lng}-${radiusKm}`}
                 center={[mapCenter.lat, mapCenter.lng]}
-                radius={radiusKm * 1000}
+                radius={radiusKm * 1000 * 0.85}
                 pathOptions={{
                   color: '#6366f1',
                   fillColor: '#6366f1',

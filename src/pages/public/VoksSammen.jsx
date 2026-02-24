@@ -36,12 +36,23 @@ const steps = [
 ];
 
 export default function VoksSammen() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'Voks sammen med oss — Din Helt',
+    description: 'Jo flere hjelpere som melder seg, jo bedre blir Din Helt for alle. Les hvordan du kan bidra til å bygge Norges største hjelpernettverk.',
+    url: 'https://dinhelt.no/voks-sammen',
+    publisher: { '@type': 'Organization', name: 'Din Helt', url: 'https://dinhelt.no' },
+  };
+
   return (
     <div>
       <SEO
         title="Voks sammen med oss"
-        description="Jo flere hjelpere som melder seg, jo bedre blir Din Helt for alle. Les om hvordan du kan bidra."
+        description="Jo flere hjelpere som melder seg, jo bedre blir Din Helt for alle. Les hvordan du kan bidra til å bygge Norges største hjelpernettverk."
         url="https://dinhelt.no/voks-sammen"
+        type="article"
+        jsonLd={jsonLd}
       />
 
       {/* Hero */}
@@ -179,7 +190,7 @@ export default function VoksSammen() {
                 De som melder seg tidlig får en fordel: færre konkurrenter, bedre synlighet, og muligheten til å bygge omdømme og anmeldelser før markedet fylles opp.
               </p>
               <p>
-                Premium er gratis frem til 1. juni 2026, så du risikerer ingenting ved å prøve.
+                Basis er gratis frem til 1. juni 2026, så du risikerer ingenting ved å prøve.
               </p>
             </div>
           </div>

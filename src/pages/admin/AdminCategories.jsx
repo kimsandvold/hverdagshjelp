@@ -11,6 +11,7 @@ const emptyForm = {
   description: '',
   color: '',
   sort_order: 0,
+  suggested_tags: [],
 };
 
 export default function AdminCategories() {
@@ -24,6 +25,7 @@ export default function AdminCategories() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export default function AdminCategories() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
+    setTagInput('');
     setModalOpen(true);
   };
 
@@ -45,13 +48,37 @@ export default function AdminCategories() {
       description: row.description || '',
       color: row.color || '',
       sort_order: row.sort_order ?? 0,
+      suggested_tags: row.suggested_tags || [],
     });
+    setTagInput('');
     setModalOpen(true);
   };
 
   const handleDelete = async (row) => {
     if (!window.confirm(`Slett kategori "${row.name}"?`)) return;
     await deleteCategory(row.id);
+  };
+
+  const handleAddTag = () => {
+    const raw = tagInput.replace(/^#/, '').trim().toLowerCase();
+    if (!raw) return;
+    if (form.suggested_tags.includes(raw)) {
+      setTagInput('');
+      return;
+    }
+    setForm({ ...form, suggested_tags: [...form.suggested_tags, raw] });
+    setTagInput('');
+  };
+
+  const handleRemoveTag = (tag) => {
+    setForm({ ...form, suggested_tags: form.suggested_tags.filter((t) => t !== tag) });
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddTag();
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -70,7 +97,27 @@ export default function AdminCategories() {
     { key: 'name', label: 'Navn' },
     { key: 'slug', label: 'Slug' },
     { key: 'description', label: 'Beskrivelse' },
-    { key: 'sort_order', label: 'Rekkefølge' },
+    {
+      key: 'suggested_tags',
+      label: 'Foreslåtte stikkord',
+      render: (val) => {
+        const tags = val || [];
+        if (tags.length === 0) return <span className="text-gray-400">—</span>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.slice(0, 4).map((t) => (
+              <span key={t} className="rounded-full bg-primary-50 px-2 py-0.5 text-xs text-primary-700">
+                {t}
+              </span>
+            ))}
+            {tags.length > 4 && (
+              <span className="text-xs text-gray-400">+{tags.length - 4}</span>
+            )}
+          </div>
+        );
+      },
+    },
+    { key: 'sort_order', label: '#' },
   ];
 
   const actions = [
@@ -158,6 +205,50 @@ export default function AdminCategories() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
+
+          {/* Suggested tags */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Foreslåtte stikkord
+            </label>
+            <p className="mb-2 text-xs text-gray-500">
+              Disse vises som klikkbare forslag når hjelpere velger stikkord for denne kategorien.
+            </p>
+            {form.suggested_tags.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {form.suggested_tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700"
+                  >
+                    #{tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-0.5 text-primary-400 hover:text-primary-700 cursor-pointer"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Skriv et stikkord..."
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+              <Button type="button" variant="secondary" onClick={handleAddTag}>
+                Legg til
+              </Button>
+            </div>
+            <p className="mt-1 text-xs text-gray-400">Trykk Enter eller komma for å legge til</p>
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" type="button" onClick={() => setModalOpen(false)}>
               Avbryt

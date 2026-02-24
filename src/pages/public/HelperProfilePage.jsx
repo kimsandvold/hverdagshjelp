@@ -4,6 +4,7 @@ import useHelperStore from '../../stores/useHelperStore';
 import useFavoritesStore from '../../stores/useFavoritesStore';
 import useAuthStore from '../../stores/useAuthStore';
 import useBookingStore from '../../stores/useBookingStore';
+import useMessagesStore from '../../stores/useMessagesStore';
 import useReferencesStore from '../../stores/useReferencesStore';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -39,6 +40,8 @@ export default function HelperProfilePage() {
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
 
   const createBooking = useBookingStore((state) => state.createBooking);
+  const startConversation = useMessagesStore((state) => state.startConversation);
+  const sendMessage = useMessagesStore((state) => state.sendMessage);
 
   const references = useReferencesStore((state) => state.references);
   const referencesLoading = useReferencesStore((state) => state.loading);
@@ -104,6 +107,15 @@ export default function HelperProfilePage() {
     if (result.error) {
       setBookingError(result.error);
     } else {
+      // Fire-and-forget: send auto-message so helper sees unread badge
+      const catName = helper.services.find(s => s.category === bookingModal)?.categoryName || bookingModal;
+      const desc = bookingDesc.trim();
+      const date = bookingDate.trim();
+      const msgText = `📋 Ny forespørsel: ${catName}\n\n${desc}${date ? `\n\nØnsket tidspunkt: ${date}` : ''}\n\nDu kan svare på forespørselen under Dashboard → Forespørsler.`;
+      startConversation(id).then(res => {
+        if (res.conversationId) sendMessage(res.conversationId, msgText);
+      }).catch(() => {});
+
       setBookingModal(null);
       setBookingDesc('');
       setBookingDate('');
@@ -134,16 +146,28 @@ export default function HelperProfilePage() {
   const helperJsonLd = helper ? {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: `${helper.name} — Hjelper`,
+    name: `${helper.name} — Hjelper på Din Helt`,
     description: helper.description || `Hjelper tilgjengelig på Din Helt`,
+    url: `https://dinhelt.no/helper/${id}`,
     provider: {
       '@type': 'Person',
       name: helper.name,
+      ...(helper.avatar_url && { image: helper.avatar_url }),
     },
     ...(helper.location && {
       areaServed: {
         '@type': 'Place',
         name: helper.location,
+      },
+    }),
+    ...(helper.services?.length > 0 && {
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Tjenester',
+        itemListElement: helper.services.map(s => ({
+          '@type': 'Offer',
+          itemOffered: { '@type': 'Service', name: s.categoryName || s.category },
+        })),
       },
     }),
   } : null;
@@ -261,8 +285,8 @@ export default function HelperProfilePage() {
 
             {/* Badges */}
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              {helper.tier === 'premium' && <Badge type="premium" />}
-              {helper.tier === 'basic' && <Badge type="basic" />}
+              {(helper.ambassador || helper.tier === 'premium') && <Badge type="premium" />}
+              {!helper.ambassador && helper.tier === 'basic' && <Badge type="basic" />}
               {helper.verified && <Badge type="verified" />}
             </div>
 

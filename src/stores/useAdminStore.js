@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { isStale, STALE_60S, STALE_5M } from '../lib/stale'
 
 const useAdminStore = create((set, get) => ({
   helpers: [],
@@ -8,8 +9,14 @@ const useAdminStore = create((set, get) => ({
   users: [],
   ads: [],
   loading: false,
+  _lastFetchedHelpers: null,
+  _lastFetchedStats: null,
+  _lastFetchedCategories: null,
+  _lastFetchedUsers: null,
+  _lastFetchedAds: null,
 
   fetchHelpers: async () => {
+    if (!isStale(get()._lastFetchedHelpers, STALE_60S)) return
     set({ loading: true })
     const { data } = await supabase
       .from('helpers')
@@ -67,6 +74,7 @@ const useAdminStore = create((set, get) => ({
       verified: h.verified,
       active: h.active,
       locked: h.locked,
+      ambassador: h.ambassador || false,
       birthDate: h.birth_date,
       languages: h.languages,
       avatarColor: h.avatar_color,
@@ -76,22 +84,24 @@ const useAdminStore = create((set, get) => ({
       lastPayment: lastPaymentByHelper[h.id] || null,
     }))
 
-    set({ helpers, loading: false })
+    set({ helpers, loading: false, _lastFetchedHelpers: Date.now() })
   },
 
   fetchStats: async () => {
+    if (!isStale(get()._lastFetchedStats, STALE_60S)) return
     const { data, error } = await supabase.rpc('get_admin_stats')
     if (!error && data) {
-      set({ stats: data })
+      set({ stats: data, _lastFetchedStats: Date.now() })
     }
   },
 
   fetchCategories: async () => {
+    if (!isStale(get()._lastFetchedCategories, STALE_5M)) return
     const { data } = await supabase
       .from('categories')
       .select('*')
       .order('sort_order')
-    set({ categories: data || [] })
+    set({ categories: data || [], _lastFetchedCategories: Date.now() })
   },
 
   toggleActive: async (id) => {
@@ -114,6 +124,16 @@ const useAdminStore = create((set, get) => ({
     }))
   },
 
+  toggleAmbassador: async (id) => {
+    const helper = get().helpers.find(h => h.id === id)
+    if (!helper) return
+    const newAmbassador = !helper.ambassador
+    await supabase.from('helpers').update({ ambassador: newAmbassador }).eq('id', id)
+    set((state) => ({
+      helpers: state.helpers.map(h => h.id === id ? { ...h, ambassador: newAmbassador } : h),
+    }))
+  },
+
   updateHelper: async (id, updates) => {
     const profileFields = {}
     const helperFields = {}
@@ -126,6 +146,7 @@ const useAdminStore = create((set, get) => ({
     if (updates.tier !== undefined) helperFields.tier = updates.tier
     if (updates.verified !== undefined) helperFields.verified = updates.verified
     if (updates.active !== undefined) helperFields.active = updates.active
+    if (updates.ambassador !== undefined) helperFields.ambassador = updates.ambassador
     if (updates.birthDate !== undefined) helperFields.birth_date = updates.birthDate
     if (updates.languages !== undefined) helperFields.languages = updates.languages
     if (updates.avatarColor !== undefined) helperFields.avatar_color = updates.avatarColor
@@ -191,20 +212,22 @@ const useAdminStore = create((set, get) => ({
   },
 
   fetchUsers: async () => {
+    if (!isStale(get()._lastFetchedUsers, STALE_60S)) return
     set({ loading: true })
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false })
-    set({ users: data || [], loading: false })
+    set({ users: data || [], loading: false, _lastFetchedUsers: Date.now() })
   },
 
   fetchAds: async () => {
+    if (!isStale(get()._lastFetchedAds, STALE_60S)) return
     const { data } = await supabase
       .from('ads')
       .select('*')
       .order('created_at', { ascending: false })
-    set({ ads: data || [] })
+    set({ ads: data || [], _lastFetchedAds: Date.now() })
   },
 
   addAd: async (ad) => {

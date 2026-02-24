@@ -3,4 +3,10 @@ Allow: /
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /auth/callback
+Disallow: /onboarding
+Disallow: /profil
+Disallow: /favoritter
+Disallow: /meldinger
+Disallow: /mine-foresporsler
+Disallow: /innstillinger
 Sitemap: https://dinhelt.no/sitemap.xml

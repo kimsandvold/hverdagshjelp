@@ -9,14 +9,26 @@ import { AVATAR_COLORS } from '../../components/HelperCard';
 const tierLabels = {
   free: 'Gratis',
   basic: 'Basis',
-  premium: 'Premium',
+  premium: 'Proff',
 };
 
 const tierOptions = [
   { value: 'free', label: 'Gratis' },
   { value: 'basic', label: 'Basis' },
-  { value: 'premium', label: 'Premium' },
+  { value: 'premium', label: 'Proff' },
 ];
+
+const paymentLabels = { active: 'Aktiv', pending: 'Venter', stopped: 'Stoppet', expired: 'Utløpt' };
+const paymentColors = { active: 'text-green-600', pending: 'text-yellow-600', stopped: 'text-red-600', expired: 'text-gray-500' };
+
+function DetailRow({ label, children }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-gray-100 py-2.5 last:border-0">
+      <span className="shrink-0 text-sm text-gray-500">{label}</span>
+      <span className="text-right text-sm font-medium text-gray-900">{children || <span className="text-gray-300">—</span>}</span>
+    </div>
+  );
+}
 
 export default function AdminHelpers() {
   const helpers = useAdminStore((state) => state.helpers);
@@ -24,8 +36,11 @@ export default function AdminHelpers() {
   const fetchHelpers = useAdminStore((state) => state.fetchHelpers);
   const toggleActive = useAdminStore((state) => state.toggleActive);
   const toggleVerified = useAdminStore((state) => state.toggleVerified);
+  const toggleAmbassador = useAdminStore((state) => state.toggleAmbassador);
   const updateHelper = useAdminStore((state) => state.updateHelper);
 
+  const [detailModal, setDetailModal] = useState(false);
+  const [selectedHelper, setSelectedHelper] = useState(null);
   const [editModal, setEditModal] = useState(false);
   const [editForm, setEditForm] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -34,6 +49,11 @@ export default function AdminHelpers() {
   useEffect(() => {
     fetchHelpers();
   }, [fetchHelpers]);
+
+  const openDetail = (row) => {
+    setSelectedHelper(row);
+    setDetailModal(true);
+  };
 
   const openEdit = (row) => {
     setEditForm({
@@ -48,8 +68,10 @@ export default function AdminHelpers() {
       avatarColor: row.avatarColor || '',
       verified: row.verified ?? false,
       active: row.active ?? true,
+      ambassador: row.ambassador ?? false,
     });
     setError(null);
+    setDetailModal(false);
     setEditModal(true);
   };
 
@@ -67,15 +89,13 @@ export default function AdminHelpers() {
     setSaving(false);
   };
 
+  // Keep selectedHelper in sync with store data
+  const liveHelper = selectedHelper
+    ? helpers.find((h) => h.id === selectedHelper.id) || selectedHelper
+    : null;
+
   const columns = [
     { key: 'name', label: 'Navn' },
-    { key: 'email', label: 'E-post' },
-    {
-      key: 'services',
-      label: 'Tjenester',
-      render: (services) =>
-        (services || []).map((s) => s.categoryName || s.category).join(', '),
-    },
     { key: 'location', label: 'Sted' },
     {
       key: 'tier',
@@ -83,50 +103,27 @@ export default function AdminHelpers() {
       render: (value) => tierLabels[value] || value,
     },
     {
-      key: 'paymentStatus',
-      label: 'Betalt',
-      render: (value) => {
-        if (!value) return <span className="text-gray-400">—</span>;
-        const labels = { active: 'Aktiv', pending: 'Venter', stopped: 'Stoppet', expired: 'Utløpt' };
-        const colors = { active: 'text-green-600', pending: 'text-yellow-600', stopped: 'text-red-600', expired: 'text-gray-500' };
-        return <span className={`font-medium ${colors[value] || 'text-gray-500'}`}>{labels[value] || value}</span>;
-      },
-    },
-    {
-      key: 'lastPayment',
-      label: 'Siste betaling',
-      render: (value) =>
-        value ? new Date(value).toLocaleDateString('nb-NO') : <span className="text-gray-400">—</span>,
-    },
-    {
       key: 'active',
       label: 'Status',
-      render: (value) => (
-        <Badge type={value ? 'verified' : 'inactive'} />
+      render: (value, row) => (
+        <div className="flex items-center gap-1.5">
+          <Badge type={value ? 'verified' : 'inactive'} />
+          {row.verified && <Badge type="verified" />}
+          {row.ambassador && (
+            <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+              Amb.
+            </span>
+          )}
+        </div>
       ),
-    },
-    {
-      key: 'verified',
-      label: 'Verifisert',
-      render: (value) => (value ? <Badge type="verified" /> : null),
     },
   ];
 
   const actions = [
     {
-      label: 'Rediger',
-      onClick: openEdit,
+      label: 'Detaljer',
+      onClick: openDetail,
       variant: 'secondary',
-    },
-    {
-      label: 'Aktiv/Inaktiv',
-      onClick: (row) => toggleActive(row.id),
-      variant: 'secondary',
-    },
-    {
-      label: 'Verifiser/Fjern',
-      onClick: (row) => toggleVerified(row.id),
-      variant: 'outline',
     },
   ];
 
@@ -147,6 +144,72 @@ export default function AdminHelpers() {
       </h1>
       <AdminTable columns={columns} data={helpers} actions={actions} />
 
+      {/* Detail modal */}
+      <Modal
+        isOpen={detailModal}
+        onClose={() => setDetailModal(false)}
+        title={liveHelper?.name || 'Hjelper'}
+        maxWidth="max-w-lg"
+      >
+        {liveHelper && (
+          <div>
+            <div className="space-y-0">
+              <DetailRow label="E-post">{liveHelper.email}</DetailRow>
+              <DetailRow label="Telefon">{liveHelper.phone}</DetailRow>
+              <DetailRow label="Sted">{liveHelper.location}</DetailRow>
+              <DetailRow label="Fødselsdato">
+                {liveHelper.birthDate
+                  ? new Date(liveHelper.birthDate).toLocaleDateString('nb-NO')
+                  : null}
+              </DetailRow>
+              <DetailRow label="Beskrivelse">{liveHelper.description}</DetailRow>
+              <DetailRow label="Tjenester">
+                {(liveHelper.services || []).map((s) => s.categoryName || s.category).join(', ') || null}
+              </DetailRow>
+              <DetailRow label="Abonnement">{tierLabels[liveHelper.tier] || liveHelper.tier}</DetailRow>
+              <DetailRow label="Betalingsstatus">
+                {liveHelper.paymentStatus ? (
+                  <span className={`font-medium ${paymentColors[liveHelper.paymentStatus] || 'text-gray-500'}`}>
+                    {paymentLabels[liveHelper.paymentStatus] || liveHelper.paymentStatus}
+                  </span>
+                ) : null}
+              </DetailRow>
+              <DetailRow label="Siste betaling">
+                {liveHelper.lastPayment
+                  ? new Date(liveHelper.lastPayment).toLocaleDateString('nb-NO')
+                  : null}
+              </DetailRow>
+            </div>
+
+            {/* Status badges */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Badge type={liveHelper.active ? 'verified' : 'inactive'} />
+              {liveHelper.verified && <Badge type="verified" />}
+              {liveHelper.ambassador && (
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                  Ambassadør
+                </span>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-200 pt-4">
+              <Button size="sm" onClick={() => openEdit(liveHelper)}>Rediger</Button>
+              <Button size="sm" variant="secondary" onClick={() => { toggleActive(liveHelper.id); }}>
+                {liveHelper.active ? 'Deaktiver' : 'Aktiver'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => { toggleVerified(liveHelper.id); }}>
+                {liveHelper.verified ? 'Fjern verifisering' : 'Verifiser'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => { toggleAmbassador(liveHelper.id); }}>
+                {liveHelper.ambassador ? 'Fjern ambassadør' : 'Gi ambassadør'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit modal */}
       <Modal
         isOpen={editModal}
         onClose={() => setEditModal(false)}
@@ -265,6 +328,15 @@ export default function AdminHelpers() {
                   className="h-4 w-4 accent-primary-500"
                 />
                 <span className="text-sm text-gray-700">Aktiv</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.ambassador}
+                  onChange={(e) => setEditForm({ ...editForm, ambassador: e.target.checked })}
+                  className="h-4 w-4 accent-amber-500"
+                />
+                <span className="text-sm text-gray-700">Ambassadør</span>
               </label>
             </div>
 

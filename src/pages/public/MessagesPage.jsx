@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import useMessagesStore from '../../stores/useMessagesStore';
 import useAuthStore from '../../stores/useAuthStore';
 import Button from '../../components/ui/Button';
+import SEO from '../../components/SEO';
 
 export default function MessagesPage() {
   const user = useAuthStore((state) => state.user);
@@ -107,6 +108,7 @@ export default function MessagesPage() {
 
   return (
     <div className="py-8">
+      <SEO title="Meldinger" description="Dine meldinger." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Meldinger</h1>
 
       <div className="flex h-[calc(100vh-16rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

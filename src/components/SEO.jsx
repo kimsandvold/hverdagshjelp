@@ -9,6 +9,7 @@ export default function SEO({
   url,
   image = DEFAULT_IMAGE,
   type = 'website',
+  noindex = false,
   jsonLd,
 }) {
   const fullTitle = title ? `${title} — ${SITE_NAME}` : SITE_NAME;
@@ -17,6 +18,7 @@ export default function SEO({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      {noindex && <meta name="robots" content="noindex,nofollow" />}
       {url && <link rel="canonical" href={url} />}
 
       {/* Open Graph */}

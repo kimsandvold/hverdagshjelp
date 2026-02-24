@@ -65,8 +65,8 @@ export default function Resultatside() {
   return (
     <>
       <SEO
-        title="Finn din hjelper"
-        description="Finn hjelpere nær deg for hverdagslige oppgaver."
+        title="Finn hjelper nær deg"
+        description="Søk blant lokale hjelpere for rengjøring, hagearbeid, flytting, barnepass, dyrepass, leksehjelp og mer."
         url="https://dinhelt.no/search"
       />
 

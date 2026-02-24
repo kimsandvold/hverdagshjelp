@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuthStore from '../../stores/useAuthStore'
 import useHelperStore from '../../stores/useHelperStore'
+import SEO from '../../components/SEO'
 
 export default function SettingsPage() {
   const { profile, role, updateProfile, deleteAccount } = useAuthStore()
@@ -71,6 +72,7 @@ export default function SettingsPage() {
 
   return (
     <div className="py-8">
+      <SEO title="Innstillinger" description="Kontoinnstillinger." noindex />
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Innstillinger</h1>
 
       {/* Privacy section */}
