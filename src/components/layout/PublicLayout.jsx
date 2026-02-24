@@ -17,7 +17,7 @@ export default function PublicLayout() {
   const [scrolled, setScrolled] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef(null)
-  const { isAuthenticated, role, profile, logout } = useAuthStore()
+  const { isAuthenticated, role, profile, onboardingCompleted, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const unreadCount = useMessagesStore((state) => state.unreadCount)
@@ -89,7 +89,7 @@ export default function PublicLayout() {
                 <NavLink to="/search" className={navLinkClass}>
                   <span className="px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors inline-block">Finn hjelper</span>
                 </NavLink>
-                {role !== 'helper' && role !== 'admin' && (
+                {role !== 'helper' && onboardingCompleted !== true && (
                   <NavLink to="/bli-hjelper" className={navLinkClass}>
                     <span className="px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors inline-block">Bli hjelper</span>
                   </NavLink>
@@ -351,7 +351,7 @@ export default function PublicLayout() {
             <NavLink to="/search" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
               Finn hjelper
             </NavLink>
-            {role !== 'helper' && role !== 'admin' && (
+            {role !== 'helper' && onboardingCompleted !== true && (
               <NavLink to="/bli-hjelper" className={({ isActive }) => `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-primary-50 text-primary-500' : 'text-gray-700 hover:bg-gray-100'}`}>
                 Bli hjelper
               </NavLink>

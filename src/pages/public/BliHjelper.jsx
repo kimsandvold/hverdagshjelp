@@ -63,13 +63,13 @@ const expectations = [
 ];
 
 export default function BliHjelper() {
-  const { isAuthenticated, role } = useAuthStore();
+  const { isAuthenticated, role, onboardingCompleted } = useAuthStore();
   const becomeHelper = useAuthStore((s) => s.becomeHelper);
   const navigate = useNavigate();
   const [upgrading, setUpgrading] = useState(false);
   const [error, setError] = useState('');
 
-  const isLoggedInUser = isAuthenticated && role !== 'helper' && role !== 'admin';
+  const canBecomeHelper = isAuthenticated && role !== 'helper' && onboardingCompleted !== true;
 
   const handleBecomeHelper = async () => {
     setError('');
@@ -118,7 +118,7 @@ export default function BliHjelper() {
             Tjen penger på det du allerede kan. Registrer deg gratis, sett dine egne priser og bli synlig for folk i nærheten.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            {isLoggedInUser ? (
+            {canBecomeHelper ? (
               <button
                 onClick={handleBecomeHelper}
                 disabled={upgrading}
@@ -339,7 +339,7 @@ export default function BliHjelper() {
             Opprett en profil på noen minutter og bli synlig for kunder i ditt område.
           </p>
           <div className="mt-8">
-            {isLoggedInUser ? (
+            {canBecomeHelper ? (
               <button
                 onClick={handleBecomeHelper}
                 disabled={upgrading}
