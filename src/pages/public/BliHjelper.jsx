@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import subscriptions from '../../data/subscriptions.json';
 import SEO from '../../components/SEO';
 import ShareButtons from '../../components/ui/ShareButtons';
+import useAuthStore from '../../stores/useAuthStore';
 
 const steps = [
   {
@@ -61,6 +63,26 @@ const expectations = [
 ];
 
 export default function BliHjelper() {
+  const { isAuthenticated, role } = useAuthStore();
+  const becomeHelper = useAuthStore((s) => s.becomeHelper);
+  const navigate = useNavigate();
+  const [upgrading, setUpgrading] = useState(false);
+  const [error, setError] = useState('');
+
+  const isLoggedInUser = isAuthenticated && role !== 'helper' && role !== 'admin';
+
+  const handleBecomeHelper = async () => {
+    setError('');
+    setUpgrading(true);
+    const result = await becomeHelper();
+    if (result.success) {
+      navigate('/onboarding');
+    } else {
+      setError(result.error);
+    }
+    setUpgrading(false);
+  };
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -96,15 +118,28 @@ export default function BliHjelper() {
             Tjen penger på det du allerede kan. Registrer deg gratis, sett dine egne priser og bli synlig for folk i nærheten.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link
-              to="/registrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
-            >
-              Kom i gang gratis
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
+            {isLoggedInUser ? (
+              <button
+                onClick={handleBecomeHelper}
+                disabled={upgrading}
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl disabled:opacity-50 cursor-pointer"
+              >
+                {upgrading ? 'Klargjør...' : 'Kom i gang gratis'}
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            ) : (
+              <Link
+                to="/registrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
+              >
+                Kom i gang gratis
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            )}
             <a
               href="#slik-fungerer-det"
               className="text-sm font-medium text-white/60 transition-colors hover:text-white/90"
@@ -112,6 +147,7 @@ export default function BliHjelper() {
               Les mer om hvordan det fungerer
             </a>
           </div>
+          {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
         </div>
       </section>
 
@@ -303,15 +339,28 @@ export default function BliHjelper() {
             Opprett en profil på noen minutter og bli synlig for kunder i ditt område.
           </p>
           <div className="mt-8">
-            <Link
-              to="/registrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
-            >
-              Kom i gang gratis
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
+            {isLoggedInUser ? (
+              <button
+                onClick={handleBecomeHelper}
+                disabled={upgrading}
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl disabled:opacity-50 cursor-pointer"
+              >
+                {upgrading ? 'Klargjør...' : 'Kom i gang gratis'}
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            ) : (
+              <Link
+                to="/registrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-accent-600 hover:shadow-xl"
+              >
+                Kom i gang gratis
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
       </section>

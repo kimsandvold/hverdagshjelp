@@ -218,6 +218,20 @@ const useAuthStore = create((set, get) => ({
     return { success: true }
   },
 
+  becomeHelper: async () => {
+    const { user, profile } = get()
+    if (!user || !profile) return { success: false, error: 'Ikke innlogget' }
+
+    try {
+      await get()._ensureHelperRecord(user.id)
+      // Reload profile to pick up new role + onboarding flag
+      await get()._loadProfile(user)
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message || 'Noe gikk galt' }
+    }
+  },
+
   completeOnboarding: async () => {
     const { user } = get()
     if (!user) return { success: false, error: 'Ikke innlogget' }
